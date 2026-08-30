@@ -19,12 +19,12 @@ const AlgoVizTheme = {
     barRange: '#1b2836',
 
     // pathfinding cell roles
-    cellWall: '#3a5e9e',
-    cellWallLit: '#608cd6',
+    cellWall: '#26344c',
+    cellWallLit: '#3b4f70',
     cellWeight: '#5b4694',
     cellWeightLit: '#7c63c4',
-    cellFrontier: '#1f8fb0',
-    cellVisited: '#123a5c',
+    cellFrontier: '#2fe0d0',
+    cellVisited: '#1d6fa8',
     cellPath: '#ffd640',
     cellStart: '#46f569',
     cellEnd: '#ff463a',

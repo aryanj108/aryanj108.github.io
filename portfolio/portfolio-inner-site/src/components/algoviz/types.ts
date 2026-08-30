@@ -94,3 +94,35 @@ export const CELL_NONE = 0;
 export const CELL_FRONTIER = 1;
 export const CELL_VISITED = 2;
 export const CELL_PATH = 3;
+
+// -- panel <-> shell contract ----------------------------------------------
+
+/** Starting arrangement of the sorting board. */
+export type Distribution = 'random' | 'nearly' | 'reversed' | 'fewUnique';
+
+/** What a drag on the pathfinding grid paints. */
+export type Brush = 'wall' | 'weight' | 'erase';
+
+/**
+ * Imperative handles a panel hands upward once, so the shell menu and buttons
+ * can drive playback. Kept out of React state deliberately: these are stable
+ * callbacks, and storing them in state would re-render on every frame.
+ */
+export interface PanelControls {
+    toggle: () => void;
+    step: () => void;
+    reset: () => void;
+}
+
+/** Everything the status strip and the button labels read. All primitives, so
+ *  the reporting effect does not re-fire on identity changes alone. */
+export interface PanelStatus {
+    title: string;
+    subtitle: string;
+    /** Long-form note, surfaced as the status bar tooltip. */
+    tip: string;
+    counters: string;
+    progress: number;
+    playing: boolean;
+    finished: boolean;
+}

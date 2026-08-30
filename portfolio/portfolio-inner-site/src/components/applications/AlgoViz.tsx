@@ -26,7 +26,7 @@ const AlgoViz: React.FC<AlgoVizAppProps> = (props) => {
             onHeightChange={setHeight}
             minimizeWindow={props.onMinimize}
         >
-            <AlgoVizApp width={width} height={height} />
+            <AlgoVizApp width={width} height={height} onClose={props.onClose} />
         </Window>
     );
 };

@@ -1,85 +1,80 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ensureAudio, playTone } from './audio';
-import { buildGrid, MAZE_META, MazeKind, mazeMeta } from './mazes';
-import { PATH_META, pathMeta, runPath } from './pathfinding';
+import { playTone } from './audio';
+import { buildGrid, MazeKind } from './mazes';
+import { pathMeta, runPath } from './pathfinding';
+import {
+    GRID_CELL,
+    PATH_SPEED,
+    SizeKey,
+    SpeedKey,
+    TERRAIN_DENSITY,
+    TerrainKey,
+} from './presets';
 import AlgoVizTheme from './theme';
 import {
+    Brush,
     CELL_FRONTIER,
     CELL_NONE,
     CELL_PATH,
     CELL_VISITED,
     Grid,
     HEAVY,
+    PanelControls,
+    PanelStatus,
     PathKey,
     PathRun,
 } from './types';
-import {
-    Caption,
-    Col,
-    CrtFrame,
-    formatInt,
-    Group,
-    OptionItem,
-    PushButton,
-    Row,
-    Select,
-    Slider,
-    Stat,
-    Swatch,
-} from './ui';
+import { CrtFrame, formatInt } from './ui';
 import { PlaybackHost, usePlayback } from './usePlayback';
 
-type Brush = 'wall' | 'weight' | 'erase';
-
-const ALGO_OPTIONS: OptionItem<PathKey>[] = PATH_META.map((m) => ({
-    value: m.key,
-    label: m.label,
-}));
-
-const MAZE_OPTIONS: OptionItem<MazeKind>[] = MAZE_META.map((m) => ({
-    value: m.key,
-    label: m.label,
-}));
-
-const BRUSH_OPTIONS: OptionItem<Brush>[] = [
-    { value: 'wall', label: 'Draw walls' },
-    { value: 'weight', label: 'Draw heavy terrain' },
-    { value: 'erase', label: 'Erase' },
-];
-
 const EMPTY_RUN: PathRun = { steps: [], found: false, cost: 0, length: 0, visited: 0 };
-
-function stepsPerFrame(speed: number): number {
-    const lo = 0.15;
-    const hi = 600;
-    return lo * Math.pow(hi / lo, (speed - 1) / 99);
-}
 
 export interface PathfindingPanelProps {
     width: number;
     height: number;
-    soundOn: boolean;
+    algo: PathKey;
+    size: SizeKey;
+    speed: SpeedKey;
+    maze: MazeKind;
+    terrain: TerrainKey;
+    brush: Brush;
+    sound: boolean;
+    showTimeline: boolean;
+    seed: number;
+    onStatus: (s: PanelStatus) => void;
+    onControls: (c: PanelControls) => void;
 }
 
-const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soundOn }) => {
-    const [algo, setAlgo] = useState<PathKey>('astar');
-    const [maze, setMaze] = useState<MazeKind>('backtracker');
-    const [brush, setBrush] = useState<Brush>('wall');
-    const [cell, setCell] = useState(16);
-    const [density, setDensity] = useState(30);
-    const [weightPct, setWeightPct] = useState(0);
-    const [speed, setSpeed] = useState(58);
+const PathfindingPanel: React.FC<PathfindingPanelProps> = ({
+    width,
+    height,
+    algo,
+    size,
+    speed,
+    maze,
+    terrain,
+    brush,
+    sound,
+    showTimeline,
+    seed,
+    onStatus,
+    onControls,
+}) => {
     const [run, setRun] = useState<PathRun>(EMPTY_RUN);
-    const [computeMs, setComputeMs] = useState(0);
-    const [mazeSeed, setMazeSeed] = useState(0);
+    const [box, setBox] = useState({ w: 640, h: 300 });
     const [gridVersion, setGridVersion] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const frameRef = useRef<HTMLDivElement | null>(null);
-    const [box, setBox] = useState({ w: 640, h: 300 });
 
-    const soundRef = useRef(soundOn);
-    soundRef.current = soundOn;
+    const cell = GRID_CELL[size];
+    const gridW = Math.max(5, Math.floor(box.w / cell));
+    const gridH = Math.max(5, Math.floor(box.h / cell));
+
+    const soundRef = useRef(sound);
+    soundRef.current = sound;
+    const brushRef = useRef<Brush>(brush);
+    brushRef.current = brush;
     const runRef = useRef<PathRun>(EMPTY_RUN);
     runRef.current = run;
 
@@ -88,11 +83,7 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
     const statsRef = useRef({ visited: 0, opened: 0 });
     /** Endpoints survive grid rebuilds; they are clamped, never assumed in range. */
     const endsRef = useRef<{ sx: number; sy: number; gx: number; gy: number } | null>(null);
-
-    const gridW = Math.max(5, Math.floor(box.w / cell));
-    const gridH = Math.max(5, Math.floor(box.h / cell));
-
-    /** `set` is 1 when the stroke is adding walls/terrain, 0 when clearing. */
+    /** `set` is 1 when the stroke adds walls/terrain, 0 when it clears. */
     const drag = useRef<{ mode: 'paint' | 'start' | 'goal'; set: number } | null>(null);
 
     // -- rendering ----------------------------------------------------------
@@ -134,8 +125,8 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
                     ctx.fillRect(px, py, 1, inner);
                 }
 
-                // Heavy terrain keeps a centre marker even once it is visited,
-                // so you can see a route paying to cross it or steering around.
+                // Heavy terrain keeps a centre marker even once explored, so a
+                // route paying to cross it stays visible.
                 if (!g.wall[i] && g.weight[i] > 1 && inner > 5) {
                     const m = Math.max(2, Math.floor(inner / 2));
                     const o = Math.floor((inner - m) / 2);
@@ -186,15 +177,13 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
                 st[step.idx] = CELL_VISITED;
                 statsRef.current.visited++;
                 if (soundRef.current && !silent) {
-                    const y = Math.floor(step.idx / g.w);
-                    playTone(1 - y / Math.max(1, g.h));
+                    playTone(1 - Math.floor(step.idx / g.w) / Math.max(1, g.h));
                 }
                 break;
             case 'path':
                 st[step.idx] = CELL_PATH;
                 if (soundRef.current && !silent) {
-                    const y = Math.floor(step.idx / g.w);
-                    playTone(1 - y / Math.max(1, g.h));
+                    playTone(1 - Math.floor(step.idx / g.w) / Math.max(1, g.h));
                 }
                 break;
             case 'done':
@@ -216,7 +205,7 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
         if (hostRef.current) hostRef.current.draw = () => draw();
     }, [draw]);
 
-    const player = usePlayback(hostRef, stepsPerFrame(speed));
+    const player = usePlayback(hostRef, PATH_SPEED[speed]);
 
     // -- grid construction --------------------------------------------------
 
@@ -226,20 +215,16 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
         let startIdx: number | undefined;
         let goalIdx: number | undefined;
         if (prev) {
-            const sx = clamp(prev.sx, gridW - 2);
-            const sy = clamp(prev.sy, gridH - 2);
-            const gx = clamp(prev.gx, gridW - 2);
-            const gy = clamp(prev.gy, gridH - 2);
-            startIdx = sy * gridW + sx;
-            goalIdx = gy * gridW + gx;
+            startIdx = clamp(prev.sy, gridH - 2) * gridW + clamp(prev.sx, gridW - 2);
+            goalIdx = clamp(prev.gy, gridH - 2) * gridW + clamp(prev.gx, gridW - 2);
         }
 
         const g = buildGrid({
             w: gridW,
             h: gridH,
             kind: maze,
-            density: density / 100,
-            weightDensity: weightPct / 100,
+            density: 0.3,
+            weightDensity: TERRAIN_DENSITY[terrain],
             start: startIdx,
             goal: goalIdx,
         });
@@ -250,18 +235,16 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
             gx: g.goal % g.w,
             gy: Math.floor(g.goal / g.w),
         };
-        setGridVersion((n) => n + 1);
+        setGridVersion((v) => v + 1);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [gridW, gridH, maze, density, weightPct, mazeSeed]);
+    }, [gridW, gridH, maze, terrain, seed]);
 
     // -- run generation -----------------------------------------------------
 
     useEffect(() => {
         const g = gridRef.current;
         if (!g) return;
-        const t0 = performance.now();
         const result = runPath(algo, g);
-        setComputeMs(performance.now() - t0);
         setRun(result);
         runRef.current = result;
         resetView();
@@ -279,7 +262,7 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
         const w = Math.max(120, Math.floor(rect.width));
         const h = Math.max(80, Math.floor(rect.height));
         setBox((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
-    }, [width, height]);
+    }, [width, height, showTimeline]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -314,9 +297,6 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
         },
         [box.w, box.h, cell]
     );
-
-    const brushRef = useRef<Brush>(brush);
-    brushRef.current = brush;
 
     /** Apply the in-progress stroke to one cell. */
     const strokeCell = useCallback((idx: number) => {
@@ -365,8 +345,7 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
                 gy: Math.floor(g.goal / g.w),
             };
         }
-        // Recompute once per stroke rather than per cell.
-        setGridVersion((n) => n + 1);
+        setGridVersion((v) => v + 1); // recompute once per stroke, not per cell
     }, []);
 
     const onMouseDown = useCallback(
@@ -384,7 +363,15 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
                 // a wall you just drew does not flicker it off again.
                 const b = brushRef.current;
                 const set =
-                    b === 'wall' ? (g.wall[idx] ? 0 : 1) : b === 'weight' ? (g.weight[idx] > 1 ? 0 : 1) : 0;
+                    b === 'wall'
+                        ? g.wall[idx]
+                            ? 0
+                            : 1
+                        : b === 'weight'
+                        ? g.weight[idx] > 1
+                            ? 0
+                            : 1
+                        : 0;
                 drag.current = { mode: 'paint', set };
             }
             strokeCell(idx);
@@ -410,210 +397,98 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({ width, height, soun
         return () => window.removeEventListener('mouseup', endStroke);
     }, [endStroke]);
 
-    // -- handlers -----------------------------------------------------------
+    // -- report upward ------------------------------------------------------
 
-    const onRun = useCallback(() => {
-        ensureAudio();
-        player.toggle();
-    }, [player]);
+    useEffect(() => {
+        onControls({ toggle: player.toggle, step: player.stepOnce, reset: player.reset });
+    }, [onControls, player.toggle, player.stepOnce, player.reset]);
 
     const meta = pathMeta(algo);
-    const mzMeta = mazeMeta(maze);
     const total = run.steps.length;
     const progress = total === 0 ? 0 : Math.round((player.index / total) * 100);
     const finished = total > 0 && player.index >= total;
     const st = statsRef.current;
+    // The route length only becomes meaningful once the replay reaches the end;
+    // showing the final figure mid-run implies the search already found it.
+    const counters =
+        formatInt(st.visited) +
+        ' explored · ' +
+        (!finished
+            ? formatInt(st.opened) + ' discovered'
+            : run.found
+            ? 'route ' + formatInt(run.length) + ', cost ' + formatInt(run.cost)
+            : 'no route');
+
+    useEffect(() => {
+        onStatus({
+            title: meta.label,
+            subtitle: meta.optimal ? 'shortest route guaranteed' : 'not guaranteed shortest',
+            tip: meta.note,
+            counters,
+            progress,
+            playing: player.playing,
+            finished,
+        });
+    }, [
+        onStatus,
+        meta.label,
+        meta.optimal,
+        meta.note,
+        counters,
+        progress,
+        player.playing,
+        finished,
+    ]);
 
     return (
-        <Col style={{ flex: 1, minHeight: 0 }}>
+        <>
             <CrtFrame style={{ flex: 1, minHeight: 90 }}>
-                <div
-                    ref={frameRef}
-                    style={{ display: 'flex', flex: 1, position: 'relative', minWidth: 0 }}
-                >
+                <div ref={frameRef} style={styles.canvasHolder}>
                     <canvas
                         ref={canvasRef}
                         onMouseDown={onMouseDown}
                         onMouseMove={onMouseMove}
-                        style={{
-                            display: 'block',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            cursor: 'crosshair',
-                        }}
+                        style={styles.canvas}
                     />
                 </div>
             </CrtFrame>
-
-            <Row style={{ marginTop: 6, marginBottom: 6 }}>
-                <PushButton onClick={onRun} primary width={70}>
-                    {player.playing ? 'Pause' : finished ? 'Replay' : 'Search'}
-                </PushButton>
-                <PushButton onClick={player.stepOnce} disabled={finished}>
-                    Step
-                </PushButton>
-                <PushButton onClick={player.reset}>Reset</PushButton>
-                <PushButton onClick={() => setMazeSeed((s) => s + 1)} width={74}>
-                    New maze
-                </PushButton>
+            {showTimeline ? (
                 <input
                     type="range"
                     min={0}
                     max={Math.max(1, total)}
                     value={player.index}
                     onChange={(e) => player.seek(Number(e.target.value))}
-                    style={{
-                        flex: 1,
-                        width: 'auto',
-                        minWidth: 60,
-                        marginLeft: 8,
-                        padding: 0,
-                        boxShadow: 'none',
-                        background: 'transparent',
-                        cursor: 'pointer',
-                    }}
+                    style={styles.timeline}
                 />
-                <span
-                    style={{
-                        fontFamily: 'MSSerif',
-                        fontSize: 11,
-                        marginLeft: 8,
-                        minWidth: 34,
-                        textAlign: 'right',
-                    }}
-                >
-                    {progress}%
-                </span>
-            </Row>
-
-            <Row wrap style={{ alignItems: 'flex-start' }}>
-                <Group title="Search" style={{ marginRight: 6, marginBottom: 6 }}>
-                    <Select value={algo} options={ALGO_OPTIONS} onChange={setAlgo} />
-                    <div style={{ display: 'flex', marginTop: 5 }}>
-                        <Select value={maze} options={MAZE_OPTIONS} onChange={setMaze} />
-                    </div>
-                    <div style={{ display: 'flex', marginTop: 5 }}>
-                        <Select value={brush} options={BRUSH_OPTIONS} onChange={setBrush} />
-                    </div>
-                </Group>
-
-                <Group title="Grid" style={{ marginRight: 6, marginBottom: 6 }}>
-                    <Row>
-                        <span style={labelStyle}>Cell</span>
-                        <Slider value={cell} min={8} max={32} onChange={setCell} />
-                        <span style={valueStyle}>{cell}px</span>
-                    </Row>
-                    <Row style={{ marginTop: 5 }}>
-                        <span style={labelStyle}>Walls</span>
-                        <Slider
-                            value={density}
-                            min={5}
-                            max={45}
-                            onChange={setDensity}
-                            disabled={maze !== 'scatter'}
-                        />
-                        <span style={valueStyle}>{density}%</span>
-                    </Row>
-                    <Row style={{ marginTop: 5 }}>
-                        <span style={labelStyle}>Heavy</span>
-                        <Slider value={weightPct} min={0} max={40} onChange={setWeightPct} />
-                        <span style={valueStyle}>{weightPct}%</span>
-                    </Row>
-                    <Row style={{ marginTop: 5 }}>
-                        <span style={labelStyle}>Speed</span>
-                        <Slider value={speed} min={1} max={100} onChange={setSpeed} />
-                        <span style={valueStyle}>{speed}</span>
-                    </Row>
-                </Group>
-
-                <Group title="This run" style={{ flex: 1, minWidth: 260, marginBottom: 6 }}>
-                    <Row wrap>
-                        <Stat label="Cells closed" value={formatInt(st.visited)} />
-                        <Stat label="Cells opened" value={formatInt(st.opened)} />
-                        <Stat label="Route length" value={run.found ? formatInt(run.length) : '-'} />
-                        <Stat label="Route cost" value={run.found ? formatInt(run.cost) : '-'} />
-                        <Stat label="Grid" value={gridW + ' x ' + gridH} />
-                        <Stat label="Compute" value={computeMs.toFixed(2) + ' ms'} />
-                    </Row>
-                    <Row wrap style={{ marginTop: 4 }}>
-                        <Stat
-                            label="Shortest route"
-                            value={meta.optimal ? 'Guaranteed' : 'Not guaranteed'}
-                            wide
-                        />
-                        <Stat
-                            label="Reads terrain cost"
-                            value={meta.weighted ? 'Yes' : 'No'}
-                            wide
-                        />
-                        <Stat label="Goal" value={run.found ? 'Reached' : 'Unreachable'} />
-                    </Row>
-                </Group>
-            </Row>
-
-            <Group style={{ marginBottom: 6 }}>
-                <p style={noteStyle}>{meta.note}</p>
-                <p style={noteStyle}>
-                    <b>{mzMeta.label}:</b> {mzMeta.note}
-                </p>
-                {weightPct === 0 && meta.weighted ? (
-                    <p style={hintStyle}>
-                        With no heavy terrain, Dijkstra and A* can only tie BFS on route cost.
-                        Raise Heavy above 0% to see them actually diverge.
-                    </p>
-                ) : null}
-                <p style={hintStyle}>
-                    Drag on the grid to draw, and drag the green or red square to move an
-                    endpoint. The search re-runs when you release.
-                </p>
-            </Group>
-
-            <div style={{ display: 'flex' }}>
-                <Caption>Legend</Caption>
-            </div>
-            <Row wrap>
-                <Swatch color={AlgoVizTheme.cellStart} label="Start" />
-                <Swatch color={AlgoVizTheme.cellEnd} label="Goal" />
-                <Swatch color={AlgoVizTheme.cellWall} label="Wall" />
-                <Swatch color={AlgoVizTheme.cellWeight} label={'Heavy terrain (cost ' + HEAVY + ')'} />
-                <Swatch color={AlgoVizTheme.cellFrontier} label="Frontier (open set)" />
-                <Swatch color={AlgoVizTheme.cellVisited} label="Closed" />
-                <Swatch color={AlgoVizTheme.cellPath} label="Final route" />
-            </Row>
-        </Col>
+            ) : null}
+        </>
     );
 };
 
-const labelStyle: React.CSSProperties = {
-    fontFamily: 'MSSerif',
-    fontSize: 11,
-    width: 40,
-    color: '#000',
-};
-
-const valueStyle: React.CSSProperties = {
-    fontFamily: 'MSSerif',
-    fontSize: 11,
-    marginLeft: 6,
-    minWidth: 34,
-    color: '#000',
-};
-
-const noteStyle: React.CSSProperties = {
-    fontFamily: 'MSSerif',
-    fontSize: 11,
-    lineHeight: 1.5,
-    marginTop: 3,
-    color: '#2b2b2b',
-};
-
-const hintStyle: React.CSSProperties = {
-    fontFamily: 'MSSerif',
-    fontSize: 11,
-    lineHeight: 1.5,
-    marginTop: 4,
-    color: '#3c4a5a',
+const styles: StyleSheetCSS = {
+    canvasHolder: {
+        display: 'flex',
+        flex: 1,
+        position: 'relative',
+        minWidth: 0,
+    },
+    canvas: {
+        display: 'block',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        cursor: 'crosshair',
+    },
+    timeline: {
+        width: 'auto',
+        marginTop: 6,
+        padding: 0,
+        boxShadow: 'none',
+        background: 'transparent',
+        cursor: 'pointer',
+        flexShrink: 0,
+    },
 };
 
 export default PathfindingPanel;
