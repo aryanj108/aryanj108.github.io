@@ -243,6 +243,15 @@ input:active {
     text-align: justify;
 }
 
+/* text-align is inherited, so without this a heading that wraps onto two
+   lines gets its word-spacing stretched by the paragraph justification
+   above it -- headings read left-aligned instead. */
+.text-block h1,
+.text-block h2,
+.text-block h3 {
+    text-align: left;
+}
+
 .site-page {
     display: flex;
     left: 0px;
