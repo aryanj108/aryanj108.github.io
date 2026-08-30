@@ -23,7 +23,7 @@ export interface ContactProps {}
 // ─────────────────────────────────────────────────────────────────────────────
 // Typed as `string` (not the inferred literal '') so TypeScript doesn't treat
 // the submit path below as unreachable while the key is still blank.
-const WEB3FORMS_ACCESS_KEY: string = ''; // e.g. 'a1b2c3d4-0000-0000-0000-abcdef123456'
+const WEB3FORMS_ACCESS_KEY: string = '5546084d-45c4-4f7e-8997-722df19db12a';
 const CONTACT_API_ENDPOINT = 'https://api.web3forms.com/submit';
 const CONTACT_EMAIL = 'aryanjalota483@gmail.com';
 
