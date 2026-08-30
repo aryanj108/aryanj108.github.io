@@ -11,12 +11,12 @@ import ResumeDownload from './ResumeDownload';
 export interface AboutProps {}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ABOUT PAGE — PLACEHOLDER
+// ABOUT PAGE
 // -----------------------------------------------------------------------------
-// This is still the original template's story (Henry's), kept as a placeholder
-// per your request. Only the name, email, and social links have been swapped to
-// yours. Replace the narrative + the two photos (workingAtComputer.jpg /
-// currentme.jpg) with your own when ready.
+// Narrative and photos are Aryan's. Figure 1 is the static robotics photo; the
+// click-through gallery below it (imageGallery) continues the numbering from
+// Figure 2. To add a photo, drop it in src/assets/pictures/ and add an entry to
+// imageGallery — the caption number follows its position automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const About: React.FC<AboutProps> = (props) => {
@@ -25,11 +25,11 @@ const About: React.FC<AboutProps> = (props) => {
     const imageGallery = [
         {
             image: meNow,
-            description: 'Me, April 2022',
+            description: 'Me, May 2026',
         },
         {
             image: vbOne,
-            description: 'Me playing volleyball with friends',
+            description: 'Playing with Baylor at Goodphil 2026',
         },
         //{
             //image: vbTwo,
@@ -37,7 +37,7 @@ const About: React.FC<AboutProps> = (props) => {
         //},
         {
             image: vbThree,
-            description: 'Working on one of my projects',
+            description: 'Grass volleyball in Austin, 2025',
         },
     ];
 
@@ -62,8 +62,9 @@ const About: React.FC<AboutProps> = (props) => {
             <br />
             <div className="text-block">
                 <p>
-                    I'm a software engineer currently working at Salesforce! I'm a Computer Science major 
-                    at the University of Texas at Austin!
+                    I'll be joining Salesforce as an Applied AI Software Engineer Intern
+                    in the Office of the CEO in San Francisco, CA! I'm a Computer Science
+                    major at the University of Texas at Austin!
                 </p>
                 <br />
                 <p>
@@ -144,9 +145,10 @@ const About: React.FC<AboutProps> = (props) => {
                         </p>
                         <br />
                         <p>
-                            In college, I was a member of the UT Men's Volleyball Team and played in tournaments against 
-                            other colleges in the colligiate level across the country. I met a lot of incredible people 
-                            through volleyball and have become part of an amazing community.
+                            In college, I completely fell in love with volleyball — I played
+                            intramurals every semester and got on the court any chance I got.
+                            I met a lot of incredible people through volleyball and have
+                            become part of an amazing community.
                         </p>
                     </div>
                     <div style={styles.verticalImage}>
@@ -208,7 +210,10 @@ const About: React.FC<AboutProps> = (props) => {
 
                     <p>
                         <sub>
-                            <b>Figure 2:</b> {imageGallery[currentImage].description}
+                            {/* Figure 1 is the robotics photo above, so the
+                                gallery continues the numbering from 2. */}
+                            <b>Figure {currentImage + 2}:</b>{' '}
+                            {imageGallery[currentImage].description}
                         </sub>
                     </p>
                 </div>

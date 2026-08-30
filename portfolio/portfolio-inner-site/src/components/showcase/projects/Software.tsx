@@ -13,7 +13,8 @@ export interface SoftwareProjectsProps {}
 // TODO: replace the GitHub profile links below with each project's repo URL.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GITHUB = 'https://github.com/aryanj108';
+// Project links are commented out for now; restore this alongside them.
+// const GITHUB = 'https://github.com/aryanj108';
 
 const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
     return (
@@ -67,6 +68,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -79,6 +81,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── Distributed Search Engine ──────────────────────────────── */}
@@ -120,6 +123,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -131,6 +135,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── High-Performance Trading Engine ────────────────────────── */}
@@ -171,6 +176,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -182,6 +188,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── Longhorn Life Sciences — iDetect (BLE Wound Monitoring App) ── */}
@@ -233,6 +240,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -240,6 +248,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         <p>Private startup repository — happy to walk through it live.</p>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── LLM Analytics Agent ─────────────────────────────────────── */}
@@ -289,6 +298,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -300,6 +310,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── Longhorn Living (Housing Mobile App) ───────────────────── */}
@@ -366,6 +377,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -381,6 +393,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── Hook Em' Hacks Website ──────────────────────────────────── */}
@@ -430,6 +443,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -456,6 +470,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── AI Parking Monitoring Lab ───────────────────────────────── */}
@@ -494,6 +509,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -509,6 +525,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── ASL Translator ──────────────────────────────────────────── */}
@@ -556,6 +573,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -571,6 +589,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             {/* ── Full-Stack Notes Sharing Platform ───────────────────────── */}
@@ -614,6 +633,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -625,6 +645,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
  
             {/* ── PDF Data Extraction Toolkit (built at DTCC) ─────────────── */}
@@ -683,6 +704,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -690,6 +712,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         <p>Internal DTCC tooling — happy to walk through it live.</p>
                     </li>
                 </ul>
+                */}
             </div>
  
             {/* ── SnapSteps — Automated Tutorial/SOP Generator (DTCC) ─────── */}
@@ -740,6 +763,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -747,6 +771,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         <p>Internal DTCC tooling — happy to walk through it live.</p>
                     </li>
                 </ul>
+                */}
             </div>
 
                         {/* ── Volleyball Video Analysis Platform ─────────────────────── */}
@@ -798,6 +823,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                {/*
                 <br />
                 <h3>Links:</h3>
                 <ul>
@@ -814,6 +840,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </a>
                     </li>
                 </ul>
+                */}
             </div>
 
             <ResumeDownload />
