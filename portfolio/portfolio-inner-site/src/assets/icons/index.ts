@@ -17,6 +17,8 @@ import windowGameIcon from './windowGameIcon.png';
 import windowExplorerIcon from './windowExplorerIcon.png';
 import windowsStartIcon from './windowsStartIcon.png';
 import scrabbleIcon from './scrabbleIcon.png';
+import algovizIcon from './algovizIcon.png';
+import windowAlgovizIcon from './windowAlgovizIcon.png';
 import close from './close.png';
 
 const icons = {
@@ -38,6 +40,8 @@ const icons = {
     windowExplorerIcon: windowExplorerIcon,
     windowsStartIcon: windowsStartIcon,
     trailIcon: trailIcon,
+    algovizIcon: algovizIcon,
+    windowAlgovizIcon: windowAlgovizIcon,
 };
 
 export type IconName = keyof typeof icons;

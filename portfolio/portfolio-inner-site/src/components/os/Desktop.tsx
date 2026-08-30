@@ -9,6 +9,7 @@ import Henordle from '../applications/Henordle';
 import Toolbar from './Toolbar';
 import DesktopShortcut, { DesktopShortcutProps } from './DesktopShortcut';
 import Scrabble from '../applications/Scrabble';
+import AlgoViz from '../applications/AlgoViz';
 import { IconName } from '../../assets/icons';
 // import Credits from '../applications/Credits';
 
@@ -59,6 +60,12 @@ const APPLICATIONS: {
         name: 'Aryordle',
         shortcutIcon: 'henordleIcon',
         component: Henordle,
+    },
+    algoviz: {
+        key: 'algoviz',
+        name: 'AlgoViz',
+        shortcutIcon: 'algovizIcon',
+        component: AlgoViz,
     },
     // credits: {
     //     key: 'credits',
