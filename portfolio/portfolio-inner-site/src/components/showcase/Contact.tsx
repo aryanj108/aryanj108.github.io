@@ -7,15 +7,25 @@ import ResumeDownload from './ResumeDownload';
 export interface ContactProps {}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONTACT FORM BACKEND
+// CONTACT FORM BACKEND — Web3Forms
 // -----------------------------------------------------------------------------
-// The original site POSTed to Henry's private API. That endpoint has been
-// replaced with a placeholder so messages are NOT sent to him. Until you stand
-// up your own backend, the form will show a friendly error and direct people to
-// email you directly. To enable it, set CONTACT_API_ENDPOINT to your own URL
-// that accepts { company, email, name, message }.
+// GitHub Pages is static-only, so the bundled Express/nodemailer server can't
+// run. Messages go through Web3Forms instead, which relays them to the address
+// the access key is registered to.
+//
+// TO ACTIVATE: get a free key at https://web3forms.com (enter your email, no
+// account needed) and paste it below. Until then the form stays disabled and
+// points people at the mailto link rather than silently failing.
+//
+// The key is a public client-side token by design — it can only send mail to
+// the verified address it belongs to, so it's safe to commit. Rotate it at
+// web3forms.com if it ever gets abused.
 // ─────────────────────────────────────────────────────────────────────────────
-const CONTACT_API_ENDPOINT = ''; // e.g. 'https://api.yourdomain.com/api/contact'
+// Typed as `string` (not the inferred literal '') so TypeScript doesn't treat
+// the submit path below as unreachable while the key is still blank.
+const WEB3FORMS_ACCESS_KEY: string = ''; // e.g. 'a1b2c3d4-0000-0000-0000-abcdef123456'
+const CONTACT_API_ENDPOINT = 'https://api.web3forms.com/submit';
+const CONTACT_EMAIL = 'aryanjalota483@gmail.com';
 
 // function to validate email
 const validateEmail = (email: string) => {
@@ -64,11 +74,10 @@ const Contact: React.FC<ContactProps> = (props) => {
             setFormMessageColor('red');
             return;
         }
-        // No backend configured yet — direct people to email instead of
-        // silently failing (or, worse, sending to someone else's server).
-        if (!CONTACT_API_ENDPOINT) {
+        // No access key yet — point people at email rather than failing silently.
+        if (!WEB3FORMS_ACCESS_KEY) {
             setFormMessage(
-                'Contact form backend not set up yet — please email me directly at aryanjalota483@gmail.com!'
+                `Contact form isn't hooked up yet — please email me directly at ${CONTACT_EMAIL}!`
             );
             setFormMessageColor(colors.red);
             return;
@@ -79,21 +88,23 @@ const Contact: React.FC<ContactProps> = (props) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Accept: 'application/json',
                 },
                 body: JSON.stringify({
-                    company,
-                    email,
+                    access_key: WEB3FORMS_ACCESS_KEY,
+                    subject: `Portfolio contact from ${name}`,
+                    from_name: 'Portfolio Site',
                     name,
+                    email,
+                    company: company || 'Not provided',
                     message,
                 }),
             });
-            // the response will be either {success: true} or {success: false, error: message}
-            const data = (await res.json()) as
-                | {
-                      success: false;
-                      error: string;
-                  }
-                | { success: true };
+            // Web3Forms replies {success: true, message} or {success: false, message}
+            const data = (await res.json()) as {
+                success: boolean;
+                message?: string;
+            };
             if (data.success) {
                 setFormMessage(`Message successfully sent. Thank you ${name}!`);
                 setCompany('');
@@ -103,7 +114,9 @@ const Contact: React.FC<ContactProps> = (props) => {
                 setFormMessageColor(colors.blue);
                 setIsLoading(false);
             } else {
-                setFormMessage(data.error);
+                setFormMessage(
+                    data.message || 'Something went wrong. Please try again.'
+                );
                 setFormMessageColor(colors.red);
                 setIsLoading(false);
             }
