@@ -152,6 +152,13 @@ const About: React.FC<AboutProps> = (props) => {
                             I met a lot of incredible people through volleyball and have
                             become part of an amazing community.
                         </p>
+                        <p style={styles.photoHint}>
+                            <sub>
+                                <i>
+                                    Click through the photos to see more &rarr;
+                                </i>
+                            </sub>
+                        </p>
                         <div style={styles.calloutContainer}>
                             <img
                                 style={styles.calloutIcon}
@@ -282,6 +289,10 @@ const styles: StyleSheetCSS = {
         height: 'auto',
         width: '100%',
         marginBottom: 32,
+    },
+    photoHint: {
+        marginTop: 12,
+        opacity: 0.6,
     },
     calloutContainer: {
         backgroundColor: 'white',
