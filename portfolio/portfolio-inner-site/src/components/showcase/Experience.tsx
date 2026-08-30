@@ -50,10 +50,11 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                 <ul>
                     <li>
                         <p>
-                            Architected and shipped a distributed AI platform
-                            with a shared Node.js/TypeScript backend, 40+ REST
-                            APIs, and an MCP tool server supporting production
-                            enterprise workflows.
+                            Architected and shipped a distributed production
+                            platform for Marc Benioff and Salesforce&rsquo;s
+                            executive leadership team; built a shared
+                            Node.js/TypeScript backend with 40+ REST APIs and
+                            an MCP tool server supporting enterprise workflows.
                         </p>
                     </li>
                     <li>
@@ -66,18 +67,18 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </li>
                     <li>
                         <p>
-                            Reduced end-to-end information retrieval and
-                            preparation time from 2 hours to 10 minutes (92%) by
-                            building production retrieval and automation
-                            workflows across enterprise systems.
+                            Reduced executive briefing preparation time 92%,
+                            from 2 hours to 10 minutes, by building production
+                            retrieval and automation workflows across
+                            enterprise systems.
                         </p>
                     </li>
                     <li>
                         <p>
-                            Migrated a production backend from SQLite to
-                            PostgreSQL across 20+ tables and implemented OAuth
-                            2.0 / Google SSO, improving scalability and
-                            deployment reliability.
+                            Improved deployment reliability and scalability by
+                            migrating a production backend from SQLite to
+                            PostgreSQL across 20+ tables and implementing
+                            OAuth 2.0/Google SSO.
                         </p>
                     </li>
                     <li>
