@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background-color: rgb(0, 0, 0);
+      margin: 0;
+    }
+
+    #webgl {
+      pointer-events: none;
+    }
+
+    #ui-app {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    #ui {
+      position: absolute;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    #monitor-videos {
+      pointer-events: none;
+      position: 'absolute';
+      opacity: 0;
+      width: 0;
+      height: 0;
+      top: 0;
+      left: 0;
+
+    }
+
+    #css {
+      cursor: pointer;
+    }
+
+    #ui-interactive {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 256px;
+    }
+
+    video {
+      position: absolute;
+      top: 0;
+      pointer-events: none;
+    }
+  </style>
+
+  <!-- ─────────────────────────────────────────────────────────────────────
+       CUSTOMIZE: Site metadata (title, description, social preview).
+       Update the URLs to your own domain and swap the preview image
+       (currently pointing at a relative /images/preview.jpg placeholder)
+       once you host your own social share image.
+       ───────────────────────────────────────────────────────────────────── -->
+
+  <!-- Primary Meta Tags -->
+  <title>Aryan Jalota - Portfolio 2026</title>
+  <meta name="title" content="Aryan Jalota - Software Engineer">
+  <meta name="description"
+    content="I'm Aryan, a Software Engineer studying Computer Science & Mathematics at UT Austin, focused on distributed systems, performance, and ML infrastructure.">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://aryanjalota.com/">
+  <meta property="og:title" content="Aryan Jalota - Software Engineer">
+  <meta property="og:description"
+    content="I'm Aryan, a Software Engineer studying Computer Science & Mathematics at UT Austin, focused on distributed systems, performance, and ML infrastructure.">
+
+  <!-- Twitter -->
+
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <meta property="twitter:url" content="https://aryanjalota.com/">
+  <meta name="twitter:url" content="https://aryanjalota.com/">
+
+  <meta property="twitter:title" content="Aryan Jalota - Software Engineer">
+  <meta name="twitter:title" content="Aryan Jalota - Software Engineer">
+
+  <meta property="twitter:description"
+    content="I'm Aryan, a Software Engineer studying Computer Science & Mathematics at UT Austin, focused on distributed systems, performance, and ML infrastructure.">
+  <meta name="twitter:description"
+    content="I'm Aryan, a Software Engineer studying Computer Science & Mathematics at UT Austin, focused on distributed systems, performance, and ML infrastructure.">
+
+  <meta property="twitter:image" content="https://aryanjalota.com/images/preview.jpg">
+  <meta name="twitter:image" content="https://aryanjalota.com/images/preview.jpg">
+
+  <!-- Images -->
+  <meta property="og:image" content="https://aryanjalota.com/images/preview.jpg">
+  <meta property="og:image:secure" content="https://aryanjalota.com/images/preview.jpg">
+
+  <link rel="shortcut icon" href="../static/images/favicon.ico" type="image/x-icon">
+
+  <!-- ─────────────────────────────────────────────────────────────────────
+       CUSTOMIZE: Google Analytics. The original site's tracking ID has been
+       removed so no analytics are reported to it. To enable your own, paste
+       your GA4 Measurement ID (G-XXXXXXXXXX) below and uncomment this block.
+       ───────────────────────────────────────────────────────────────────── -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  -->
+
+</head>
+
+<body>
+  <div id="css"></div>
+  <div id="webgl"></div>
+  <div id="overlay"></div>
+  <div id="ui-interactive"></div>
+  <div id="ui"></div>
+  <div id="monitor-videos">
+    <video id="video-1" muted loop autoplay width="0" height="0" src="../static/textures/monitor/video/base-static.mp4"
+      style="opacity: 0;"></video>
+    <video id="video-2" muted loop autoplay width="0" height="0"
+      src="../static/textures/monitor/video/static-texture-layer.mp4" style="opacity: 0;"></video>
+  </div>
+</body>
+
+</html>
