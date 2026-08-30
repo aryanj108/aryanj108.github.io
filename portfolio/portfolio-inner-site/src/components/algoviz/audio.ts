@@ -11,7 +11,9 @@ let lastToneAt = 0;
 /** Minimum gap between tones; without it fast playback machine-guns. */
 const THROTTLE_MS = 16;
 
-type AudioWindow = Window & { webkitAudioContext?: typeof AudioContext };
+// `typeof window`, not `Window`: the AudioContext constructor lives on
+// `typeof globalThis`, and naming the `Window` interface alone drops it.
+type AudioWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
 
 /** Call from a click handler — that gesture is what lets the context start. */
 export function ensureAudio(): void {
