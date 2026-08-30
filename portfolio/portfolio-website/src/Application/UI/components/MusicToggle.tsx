@@ -21,6 +21,7 @@ interface MusicToggleProps {}
 // several MB each. They load lazily on first play instead.
 // ─────────────────────────────────────────────────────────────────────────────
 const TRACKS = [
+    { name: 'Elevator', src: 'audio/radio/elevator.mp3' },
     { name: 'Track 1', src: 'audio/radio/1.mp3' },
     { name: 'Track 2', src: 'audio/radio/2.mp3' },
     { name: 'Track 3', src: 'audio/radio/3.mp3' },

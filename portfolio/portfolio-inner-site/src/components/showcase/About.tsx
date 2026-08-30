@@ -5,6 +5,8 @@ import meNow from '../../assets/pictures/aryan-2026.jpg';
 import vbOne from '../../assets/pictures/volleyball/vb-solo.jpg';
 //import vbTwo from '../../assets/pictures/volleyball/vb-group.jpg';
 import vbThree from '../../assets/pictures/volleyball/vb-s.jpg';
+import tiktok from '../../assets/pictures/tiktok.svg';
+import { track } from '../../utils/analytics';
 import { Link } from 'react-router-dom';
 import ResumeDownload from './ResumeDownload';
 
@@ -150,6 +152,24 @@ const About: React.FC<AboutProps> = (props) => {
                             I met a lot of incredible people through volleyball and have
                             become part of an amazing community.
                         </p>
+                        <div style={styles.calloutContainer}>
+                            <img
+                                style={styles.calloutIcon}
+                                src={tiktok}
+                                alt=""
+                            />
+                            <div style={styles.calloutText}>
+                                <h3>Check out my volleyball TikTok</h3>
+                                <a
+                                    rel="noreferrer"
+                                    target="_blank"
+                                    href="https://www.tiktok.com/@orion.vb"
+                                    onClick={() => track('tiktok-click')}
+                                >
+                                    <p>@orion.vb</p>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div style={styles.verticalImage}>
                     <div
@@ -262,6 +282,25 @@ const styles: StyleSheetCSS = {
         height: 'auto',
         width: '100%',
         marginBottom: 32,
+    },
+    calloutContainer: {
+        backgroundColor: 'white',
+        padding: 12,
+        marginTop: 24,
+        boxSizing: 'border-box',
+        border: '2px solid black',
+        borderLeftWidth: 0,
+        borderRightWidth: 0,
+        width: '100%',
+        alignItems: 'center',
+    },
+    calloutIcon: {
+        width: 36,
+        height: 36,
+        paddingRight: 20,
+    },
+    calloutText: {
+        flexDirection: 'column',
     },
     verticalImage: {
         alignSelf: 'center',
