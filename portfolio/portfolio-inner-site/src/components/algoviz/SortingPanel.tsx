@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { playTone } from './audio';
-import { SORT_SIZE, SORT_SPEED, SizeKey, SpeedKey } from './presets';
+import { SORT_SPEED, SpeedKey } from './presets';
 import { runSort, sortMeta } from './sorting';
 import AlgoVizTheme from './theme';
 import {
@@ -73,7 +73,8 @@ export interface SortingPanelProps {
     width: number;
     height: number;
     algo: SortKey;
-    size: SizeKey;
+    /** Number of elements to sort. */
+    pointCount: number;
     speed: SpeedKey;
     order: Distribution;
     sound: boolean;
@@ -87,7 +88,7 @@ const SortingPanel: React.FC<SortingPanelProps> = ({
     width,
     height,
     algo,
-    size,
+    pointCount,
     speed,
     order,
     sound,
@@ -104,7 +105,8 @@ const SortingPanel: React.FC<SortingPanelProps> = ({
 
     const meta = sortMeta(algo);
     // Bogo is only tractable on a handful of elements, so it caps the preset.
-    const n = meta.maxN ? Math.min(SORT_SIZE[size], meta.maxN) : SORT_SIZE[size];
+    // Bogo is only tractable on a handful of elements, so meta.maxN still caps it.
+    const n = meta.maxN ? Math.min(pointCount, meta.maxN) : pointCount;
 
     const soundRef = useRef(sound);
     soundRef.current = sound;

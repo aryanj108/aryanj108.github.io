@@ -20,6 +20,10 @@ import scrabbleIcon from './scrabbleIcon.png';
 import algovizIcon from './algovizIcon.png';
 import windowAlgovizIcon from './windowAlgovizIcon.png';
 import close from './close.png';
+import skillsIcon from './skillsIcon.png';
+import windowSkillsIcon from './windowSkillsIcon.png';
+import contactIcon from './contactIcon.png';
+import windowContactIcon from './windowContactIcon.png';
 
 const icons = {
     windowResize: windowResize,
@@ -40,6 +44,10 @@ const icons = {
     windowExplorerIcon: windowExplorerIcon,
     windowsStartIcon: windowsStartIcon,
     trailIcon: trailIcon,
+    skillsIcon: skillsIcon,
+    windowSkillsIcon: windowSkillsIcon,
+    contactIcon: contactIcon,
+    windowContactIcon: windowContactIcon,
     algovizIcon: algovizIcon,
     windowAlgovizIcon: windowAlgovizIcon,
 };

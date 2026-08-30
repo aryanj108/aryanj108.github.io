@@ -1,46 +1,53 @@
-// The AlgoViz shell: menu bar, board, three buttons, status strip.
+// The AlgoViz shell: an overview listing every algorithm, and a detail screen
+// that runs one of them.
 //
-// All settings live here rather than in the panels, because a single menu bar
-// drives both modes. The panels are near-dumb renderers: they take settings as
-// props, own only their canvas and playback engine, and report back through
-// onStatus (reactive) and onControls (imperative).
+// The panels below are unchanged renderers — they own their canvas and playback
+// engine and report back through onStatus (reactive) and onControls
+// (imperative). Speed, terrain, brush, sound and the timeline are held at fixed
+// defaults here rather than surfaced as controls; the panels still accept them,
+// so re-exposing any of them is only a matter of adding a control.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import AboutDialog, { HowToPlayDialog } from './AboutDialog';
 import { closeAudio, ensureAudio } from './audio';
-import MenuBar, { Menu, MenuItem } from './MenuBar';
 import { MAZE_META, MazeKind } from './mazes';
 import PathfindingPanel from './PathfindingPanel';
 import { PATH_META } from './pathfinding';
-import {
-    Choice,
-    SIZE_CHOICES,
-    SizeKey,
-    SPEED_CHOICES,
-    SpeedKey,
-    TERRAIN_CHOICES,
-    TerrainKey,
-} from './presets';
+import { SpeedKey, TerrainKey } from './presets';
 import { runSelfTest } from './selftest';
 import SortingPanel from './SortingPanel';
 import { SORT_META } from './sorting';
-import { Brush, Distribution, PanelControls, PanelStatus, PathKey, SortKey } from './types';
+import {
+    Brush,
+    Distribution,
+    PanelControls,
+    PanelStatus,
+    PathKey,
+    SortKey,
+} from './types';
 
-type Mode = 'sorting' | 'pathfinding';
-type DialogKind = 'about' | 'help' | null;
+type Screen =
+    | { kind: 'overview' }
+    | { kind: 'sorting'; algo: SortKey }
+    | { kind: 'pathfinding'; algo: PathKey };
 
-const ORDER_CHOICES: Choice<Distribution>[] = [
-    { key: 'random', label: 'Random' },
+// Held constant so the overview stays as simple as the reference design.
+const SPEED: SpeedKey = 'normal';
+const TERRAIN: TerrainKey = 'none';
+const BRUSH: Brush = 'wall';
+const SOUND = false;
+const SHOW_TIMELINE = false;
+
+const ORDER_CHOICES: { key: string; label: string }[] = [
+    { key: 'random', label: 'Randomly distributed' },
     { key: 'nearly', label: 'Nearly sorted' },
     { key: 'reversed', label: 'Reversed' },
     { key: 'fewUnique', label: 'Few unique' },
 ];
 
-const BRUSH_CHOICES: Choice<Brush>[] = [
-    { key: 'wall', label: 'Walls' },
-    { key: 'weight', label: 'Heavy terrain' },
-    { key: 'erase', label: 'Erase' },
-];
+const POINTS_MIN = 5;
+const POINTS_MAX = 400;
+const AREA_MIN = 5;
+const AREA_MAX = 120;
 
 const IDLE_STATUS: PanelStatus = {
     title: '',
@@ -52,27 +59,24 @@ const IDLE_STATUS: PanelStatus = {
     finished: false,
 };
 
+const clamp = (n: number, lo: number, hi: number) =>
+    Number.isNaN(n) ? lo : Math.min(hi, Math.max(lo, n));
+
 export interface AlgoVizAppProps {
     width: number;
     height: number;
     onClose: () => void;
 }
 
-const AlgoVizApp: React.FC<AlgoVizAppProps> = ({ width, height, onClose }) => {
-    const [mode, setMode] = useState<Mode>('sorting');
-    const [sortAlgo, setSortAlgo] = useState<SortKey>('quick');
-    const [pathAlgo, setPathAlgo] = useState<PathKey>('astar');
-    const [size, setSize] = useState<SizeKey>('medium');
-    const [speed, setSpeed] = useState<SpeedKey>('normal');
+const AlgoVizApp: React.FC<AlgoVizAppProps> = ({ width, height }) => {
+    const [screen, setScreen] = useState<Screen>({ kind: 'overview' });
     const [order, setOrder] = useState<Distribution>('random');
     const [maze, setMaze] = useState<MazeKind>('backtracker');
-    const [terrain, setTerrain] = useState<TerrainKey>('none');
-    const [brush, setBrush] = useState<Brush>('wall');
-    const [sound, setSound] = useState(false);
-    const [showTimeline, setShowTimeline] = useState(false);
-    const [dialog, setDialog] = useState<DialogKind>(null);
+    const [points, setPoints] = useState(50);
+    const [areaW, setAreaW] = useState(40);
+    const [areaH, setAreaH] = useState(20);
 
-    // Bumped by Game > New to reshuffle the array or carve a fresh maze.
+    // Bumped to reshuffle the array or carve a fresh maze.
     const [seed, setSeed] = useState(0);
     const [status, setStatus] = useState<PanelStatus>(IDLE_STATUS);
     const controls = useRef<PanelControls | null>(null);
@@ -86,147 +90,180 @@ const AlgoVizApp: React.FC<AlgoVizAppProps> = ({ width, height, onClose }) => {
         controls.current = c;
     }, []);
 
-    const toggleSound = useCallback(() => {
-        setSound((on) => {
-            if (!on) ensureAudio(); // this click is the gesture that starts it
-            return !on;
-        });
-    }, []);
+    const regenerate = useCallback(() => setSeed((s) => s + 1), []);
 
-    const newBoard = useCallback(() => setSeed((s) => s + 1), []);
     const run = useCallback(() => {
         ensureAudio();
         if (controls.current) controls.current.toggle();
     }, []);
-    const step = useCallback(() => {
-        if (controls.current) controls.current.step();
+
+    const backToOverview = useCallback(() => {
+        controls.current = null;
+        setStatus(IDLE_STATUS);
+        setScreen({ kind: 'overview' });
     }, []);
-    const reset = useCallback(() => {
-        if (controls.current) controls.current.reset();
-    }, []);
 
-    // -- menus --------------------------------------------------------------
+    // -- shared option controls ---------------------------------------------
 
-    function radios<T extends string>(
-        choices: Choice<T>[],
-        current: T,
-        set: (v: T) => void
-    ): MenuItem[] {
-        return choices.map((c) => ({
-            kind: 'radio' as const,
-            label: c.label,
-            checked: current === c.key,
-            onSelect: () => set(c.key),
-        }));
-    }
+    const strategyRow = (
+        label: string,
+        value: string,
+        onChange: (v: string) => void,
+        options: { key: string; label: string }[]
+    ) => (
+        <div style={styles.field}>
+            <label style={styles.fieldLabel}>{label}</label>
+            <select
+                style={styles.select}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                {options.map((o) => (
+                    <option key={o.key} value={o.key}>
+                        {o.label}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
 
-    const algoItems: MenuItem[] =
-        mode === 'sorting'
-            ? radios(
-                  SORT_META.map((m) => ({ key: m.key, label: m.label })),
-                  sortAlgo,
-                  setSortAlgo
-              )
-            : radios(
-                  PATH_META.map((m) => ({ key: m.key, label: m.label })),
-                  pathAlgo,
-                  setPathAlgo
-              );
+    const numberRow = (
+        label: string,
+        value: number,
+        onChange: (v: number) => void,
+        lo: number,
+        hi: number
+    ) => (
+        <div style={styles.field}>
+            <label style={styles.fieldLabel}>{label}</label>
+            <input
+                style={styles.input}
+                type="number"
+                min={lo}
+                max={hi}
+                value={value}
+                onChange={(e) =>
+                    onChange(clamp(parseInt(e.target.value, 10), lo, hi))
+                }
+            />
+        </div>
+    );
 
-    const optionItems: MenuItem[] = [
-        { kind: 'heading', label: 'Size' },
-        ...radios(SIZE_CHOICES, size, setSize),
-        { kind: 'separator' },
-        { kind: 'heading', label: 'Speed' },
-        ...radios(SPEED_CHOICES, speed, setSpeed),
-        { kind: 'separator' },
-    ];
-    if (mode === 'sorting') {
-        optionItems.push({ kind: 'heading', label: 'Starting order' });
-        optionItems.push(...radios(ORDER_CHOICES, order, setOrder));
-    } else {
-        optionItems.push({ kind: 'heading', label: 'Maze' });
-        optionItems.push(
-            ...radios(
-                MAZE_META.map((m) => ({ key: m.key, label: m.label })),
+    const sortingOptions = (
+        <>
+            {strategyRow(
+                'Data generation strategy',
+                order,
+                (v) => setOrder(v as Distribution),
+                ORDER_CHOICES
+            )}
+            {numberRow(
+                'Data generation points',
+                points,
+                setPoints,
+                POINTS_MIN,
+                POINTS_MAX
+            )}
+        </>
+    );
+
+    const pathOptions = (
+        <>
+            {strategyRow(
+                'Data generation strategy',
                 maze,
-                setMaze
-            )
+                (v) => setMaze(v as MazeKind),
+                MAZE_META.map((m) => ({ key: m.key as string, label: m.label }))
+            )}
+            {numberRow(
+                'Path finding area width',
+                areaW,
+                setAreaW,
+                AREA_MIN,
+                AREA_MAX
+            )}
+            {numberRow(
+                'Path finding area height',
+                areaH,
+                setAreaH,
+                AREA_MIN,
+                AREA_MAX
+            )}
+        </>
+    );
+
+    // -- overview -----------------------------------------------------------
+
+    if (screen.kind === 'overview') {
+        return (
+            <div style={styles.root}>
+                <div style={styles.scroll}>
+                    <h1 style={styles.heading}>Sorting</h1>
+                    <div style={styles.buttonRow}>
+                        {SORT_META.map((m) => (
+                            <button
+                                key={m.key}
+                                type="button"
+                                className="site-button"
+                                style={styles.pickButton}
+                                onClick={() =>
+                                    setScreen({ kind: 'sorting', algo: m.key })
+                                }
+                            >
+                                {m.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <h3 style={styles.subheading}>Sorting options</h3>
+                    {sortingOptions}
+
+                    <h1 style={styles.heading}>Path finding</h1>
+                    <div style={styles.buttonRow}>
+                        {PATH_META.map((m) => (
+                            <button
+                                key={m.key}
+                                type="button"
+                                className="site-button"
+                                style={styles.pickButton}
+                                onClick={() =>
+                                    setScreen({
+                                        kind: 'pathfinding',
+                                        algo: m.key,
+                                    })
+                                }
+                            >
+                                {m.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <h3 style={styles.subheading}>Path finding options</h3>
+                    {pathOptions}
+                </div>
+            </div>
         );
-        optionItems.push({ kind: 'separator' });
-        optionItems.push({ kind: 'heading', label: 'Heavy terrain' });
-        optionItems.push(...radios(TERRAIN_CHOICES, terrain, setTerrain));
-        optionItems.push({ kind: 'separator' });
-        optionItems.push({ kind: 'heading', label: 'Draw with' });
-        optionItems.push(...radios(BRUSH_CHOICES, brush, setBrush));
     }
-    optionItems.push({ kind: 'separator' });
-    optionItems.push({
-        kind: 'check',
-        label: 'Show timeline',
-        checked: showTimeline,
-        onSelect: () => setShowTimeline((v) => !v),
-    });
 
-    const menus: Menu[] = [
-        {
-            label: 'Game',
-            items: [
-                { kind: 'action', label: 'New', onSelect: newBoard },
-                {
-                    kind: 'action',
-                    label: status.playing ? 'Pause' : 'Start',
-                    onSelect: run,
-                },
-                { kind: 'action', label: 'Step', onSelect: step, disabled: status.finished },
-                { kind: 'action', label: 'Reset', onSelect: reset },
-                { kind: 'separator' },
-                {
-                    kind: 'radio',
-                    label: 'Sorting',
-                    checked: mode === 'sorting',
-                    onSelect: () => setMode('sorting'),
-                },
-                {
-                    kind: 'radio',
-                    label: 'Pathfinding',
-                    checked: mode === 'pathfinding',
-                    onSelect: () => setMode('pathfinding'),
-                },
-                { kind: 'separator' },
-                { kind: 'check', label: 'Sound', checked: sound, onSelect: toggleSound },
-                { kind: 'separator' },
-                { kind: 'action', label: 'Close', onSelect: onClose },
-            ],
-        },
-        { label: 'Algorithm', items: algoItems },
-        { label: 'Options', items: optionItems },
-        {
-            label: 'Help',
-            items: [
-                { kind: 'action', label: 'How to play', onSelect: () => setDialog('help') },
-                { kind: 'separator' },
-                { kind: 'action', label: 'About AlgoViz', onSelect: () => setDialog('about') },
-            ],
-        },
-    ];
+    // -- detail -------------------------------------------------------------
 
-    // -- render -------------------------------------------------------------
+    const isSorting = screen.kind === 'sorting';
+    const title = isSorting
+        ? SORT_META.find((m) => m.key === screen.algo)?.label
+        : PATH_META.find((m) => m.key === screen.algo)?.label;
 
     return (
         <div style={styles.root}>
-            <MenuBar menus={menus} />
-
-            {mode === 'sorting' ? (
+            {screen.kind === 'sorting' ? (
                 <SortingPanel
                     width={width}
                     height={height}
-                    algo={sortAlgo}
-                    size={size}
-                    speed={speed}
+                    algo={screen.algo}
+                    pointCount={points}
+                    speed={SPEED}
                     order={order}
-                    sound={sound}
-                    showTimeline={showTimeline}
+                    sound={SOUND}
+                    showTimeline={SHOW_TIMELINE}
                     seed={seed}
                     onStatus={setStatus}
                     onControls={onControls}
@@ -235,60 +272,57 @@ const AlgoVizApp: React.FC<AlgoVizAppProps> = ({ width, height, onClose }) => {
                 <PathfindingPanel
                     width={width}
                     height={height}
-                    algo={pathAlgo}
-                    size={size}
-                    speed={speed}
+                    algo={screen.algo}
+                    cols={areaW}
+                    rows={areaH}
+                    speed={SPEED}
                     maze={maze}
-                    terrain={terrain}
-                    brush={brush}
-                    sound={sound}
-                    showTimeline={showTimeline}
+                    terrain={TERRAIN}
+                    brush={BRUSH}
+                    sound={SOUND}
+                    showTimeline={SHOW_TIMELINE}
                     seed={seed}
                     onStatus={setStatus}
                     onControls={onControls}
                 />
             )}
 
-            <div style={styles.buttons}>
-                <button type="button" className="site-button" style={styles.button} onClick={run}>
-                    {status.playing ? 'Pause' : status.finished ? 'Replay' : 'Start'}
-                </button>
+            <div style={styles.detailPanel}>
+                <h3 style={styles.detailTitle}>{title}</h3>
                 <button
                     type="button"
                     className="site-button"
-                    style={styles.button}
-                    onClick={step}
-                    disabled={status.finished}
+                    style={styles.actionButton}
+                    onClick={run}
                 >
-                    Step
+                    {status.playing
+                        ? 'Pause'
+                        : status.finished
+                        ? 'Replay'
+                        : 'Start'}
                 </button>
+
+                <div style={styles.rule} />
+
                 <button
                     type="button"
                     className="site-button"
-                    style={styles.button}
-                    onClick={newBoard}
+                    style={styles.actionButton}
+                    onClick={regenerate}
                 >
-                    New
+                    Regenerate
+                </button>
+
+                {isSorting ? sortingOptions : pathOptions}
+
+                <button
+                    type="button"
+                    style={styles.back}
+                    onClick={backToOverview}
+                >
+                    Return to overview
                 </button>
             </div>
-
-            <div style={styles.status}>
-                <div style={styles.statusCell} title={status.tip}>
-                    <b>{status.title}</b>
-                    {status.subtitle ? (
-                        <span style={styles.statusSubtitle}>{status.subtitle}</span>
-                    ) : null}
-                </div>
-                <div style={{ ...styles.statusCell, ...styles.statusCounters }}>
-                    {status.counters}
-                </div>
-                <div style={{ ...styles.statusCell, ...styles.statusProgress }}>
-                    {status.progress}%
-                </div>
-            </div>
-
-            {dialog === 'about' ? <AboutDialog onClose={() => setDialog(null)} /> : null}
-            {dialog === 'help' ? <HowToPlayDialog onClose={() => setDialog(null)} /> : null}
         </div>
     );
 };
@@ -302,61 +336,89 @@ const styles: StyleSheetCSS = {
         right: 0,
         bottom: 0,
         left: 0,
-        padding: 6,
+        padding: 10,
         boxSizing: 'border-box',
-        backgroundColor: '#c3c6ca',
+        backgroundColor: '#ffffff',
         overflow: 'hidden',
     },
-    buttons: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexShrink: 0,
-        marginTop: 6,
+    scroll: {
+        flexDirection: 'column',
+        overflowY: 'auto',
+        width: '100%',
+        height: '100%',
+    },
+    heading: {
+        marginBottom: 8,
+    },
+    subheading: {
+        marginTop: 14,
         marginBottom: 6,
     },
-    button: {
+    buttonRow: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 4,
+    },
+    pickButton: {
         fontFamily: 'MSSerif',
         fontSize: 11,
         padding: '5px 10px',
-        minWidth: 72,
         marginRight: 6,
+        marginBottom: 6,
     },
-    status: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'stretch',
+    detailPanel: {
+        flexDirection: 'column',
         flexShrink: 0,
-        height: 20,
+        paddingTop: 10,
+        overflowY: 'auto',
     },
-    statusCell: {
-        display: 'flex',
-        alignItems: 'center',
-        flex: 1,
-        minWidth: 0,
-        marginRight: 3,
-        padding: '0 6px',
+    detailTitle: {
+        marginBottom: 6,
+    },
+    actionButton: {
         fontFamily: 'MSSerif',
         fontSize: 11,
-        color: '#000',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        border: '1px solid #ffffff',
-        borderTopColor: '#86898d',
-        borderLeftColor: '#86898d',
+        padding: '5px 10px',
+        alignSelf: 'flex-start',
+        marginBottom: 8,
     },
-    statusSubtitle: {
-        marginLeft: 8,
-        color: '#4c5257',
+    rule: {
+        height: 1,
+        width: '100%',
+        backgroundColor: '#c3c6ca',
+        marginTop: 4,
+        marginBottom: 10,
     },
-    statusCounters: {
-        flex: 1,
+    field: {
+        alignItems: 'center',
+        marginBottom: 6,
     },
-    statusProgress: {
-        flex: 0,
-        marginRight: 0,
-        minWidth: 46,
-        justifyContent: 'flex-end',
+    fieldLabel: {
+        fontFamily: 'MSSerif',
+        fontSize: 12,
+        marginRight: 10,
+    },
+    select: {
+        fontFamily: 'MSSerif',
+        fontSize: 12,
+    },
+    input: {
+        fontFamily: 'MSSerif',
+        fontSize: 12,
+        width: 70,
+    },
+    back: {
+        marginTop: 10,
+        fontFamily: 'MSSerif',
+        fontSize: 12,
+        color: '#0000ee',
+        textDecoration: 'underline',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        alignSelf: 'flex-start',
     },
 };
 

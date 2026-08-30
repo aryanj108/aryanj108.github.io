@@ -1,8 +1,7 @@
 import React from 'react';
-import ResumeDownload from './ResumeDownload';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SKILLS PAGE  (added for Aryan Jalota)
+// SKILLS APP
 // -----------------------------------------------------------------------------
 // Brand logos are real SVGs pulled from simple-icons and stored in
 //   src/assets/icons/skills/*.svg
@@ -10,6 +9,8 @@ import ResumeDownload from './ResumeDownload';
 // an entry to the relevant category in the SKILL_CATEGORIES array.
 // Skills without an official logo fall back to a colored monogram badge — just
 // omit the `icon` field and (optionally) give a `color`.
+//
+// Rendered as a standalone desktop app (see applications/SkillsApp.tsx).
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Brand logo SVGs (simple-icons, brand-colored)
@@ -63,7 +64,7 @@ import containers from '../../assets/icons/skills/containers.svg';
 import deltalake from '../../assets/icons/skills/deltalake.svg';
 import hdf5 from '../../assets/icons/skills/hdf5.svg';
 
-export interface SkillsProps {}
+export interface SkillsViewProps {}
 
 interface Skill {
     name: string;
@@ -187,8 +188,7 @@ const SKILL_CATEGORIES: SkillCategory[] = [
     },
 ];
 
-// A single skill card: brand logo, or a colored monogram when no logo exists.
-const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
+const SkillRow: React.FC<{ skill: Skill }> = ({ skill }) => {
     const monogram = skill.name
         .replace(/[^a-zA-Z0-9+ ]/g, '')
         .split(' ')
@@ -198,10 +198,10 @@ const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
         .toUpperCase();
 
     return (
-        <div className="big-button-container" style={styles.card}>
+        <div style={styles.row}>
             <div style={styles.iconWrap}>
                 {skill.icon ? (
-                    <img src={skill.icon} alt={skill.name} style={styles.icon} />
+                    <img src={skill.icon} alt="" style={styles.icon} />
                 ) : (
                     <div
                         style={Object.assign({}, styles.monogram, {
@@ -212,38 +212,22 @@ const SkillCard: React.FC<{ skill: Skill }> = ({ skill }) => {
                     </div>
                 )}
             </div>
-            <p style={styles.cardLabel}>
-                <b>{skill.name}</b>
-            </p>
+            <p style={styles.label}>{skill.name}</p>
         </div>
     );
 };
 
-const Skills: React.FC<SkillsProps> = (props) => {
+const SkillsView: React.FC<SkillsViewProps> = () => {
     return (
-        <div className="site-page-content">
-            <h1>Skills</h1>
-            <h3>& Technologies</h3>
-            <br />
-            <p>
-                A snapshot of the languages, tools, and systems I work with
-                across low-level systems programming, distributed data
-                platforms, and applied machine learning. Hover over any tile to
-                highlight it.
-            </p>
-            <br />
-            <ResumeDownload />
-            <br />
+        <div style={styles.page}>
             {SKILL_CATEGORIES.map((category) => (
-                <div className="text-block" key={category.title}>
-                    <h2>{category.title}</h2>
-                    <br />
+                <div key={category.title} style={styles.section}>
+                    <h1 style={styles.heading}>{category.title}</h1>
                     <div style={styles.grid}>
                         {category.skills.map((skill) => (
-                            <SkillCard key={skill.name} skill={skill} />
+                            <SkillRow key={skill.name} skill={skill} />
                         ))}
                     </div>
-                    <br />
                 </div>
             ))}
         </div>
@@ -251,50 +235,62 @@ const Skills: React.FC<SkillsProps> = (props) => {
 };
 
 const styles: StyleSheetCSS = {
-    grid: {
-        display: 'flex',
-        flexWrap: 'wrap',
+    page: {
+        // .site-page is overflow:hidden and .site-page-content carries a 300px
+        // sidebar margin meant for the showcase, so this owns its own scrolling.
+        flexDirection: 'column',
+        padding: 32,
+        paddingTop: 24,
+        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+    },
+    section: {
+        flexDirection: 'column',
+        marginBottom: 28,
         width: '100%',
     },
-    card: {
-        flexDirection: 'column',
+    heading: {
+        marginBottom: 16,
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        columnGap: 24,
+        rowGap: 14,
+        width: '100%',
+    },
+    row: {
         alignItems: 'center',
-        justifyContent: 'center',
-        width: 104,
-        height: 104,
-        margin: 8,
-        padding: 8,
-        boxSizing: 'border-box',
-        textAlign: 'center',
     },
     iconWrap: {
-        height: 44,
-        width: 44,
+        width: 28,
+        height: 28,
+        minWidth: 28,
+        marginRight: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 10,
     },
     icon: {
-        maxHeight: 44,
-        maxWidth: 44,
+        maxWidth: 28,
+        maxHeight: 28,
         objectFit: 'contain',
     },
     monogram: {
-        height: 44,
-        width: 44,
-        borderRadius: 6,
+        width: 28,
+        height: 28,
+        borderRadius: 4,
         color: 'white',
-        fontSize: 13,
         fontWeight: 'bold',
+        fontSize: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        display: 'flex',
-    },
-    cardLabel: {
-        fontSize: 12,
-        lineHeight: 1.1,
         textAlign: 'center',
+    },
+    label: {
+        lineHeight: 1.1,
     },
 };
 
-export default Skills;
+export default SkillsView;

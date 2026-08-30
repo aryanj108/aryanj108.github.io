@@ -3,9 +3,7 @@ import { playTone } from './audio';
 import { buildGrid, MazeKind } from './mazes';
 import { pathMeta, runPath } from './pathfinding';
 import {
-    GRID_CELL,
     PATH_SPEED,
-    SizeKey,
     SpeedKey,
     TERRAIN_DENSITY,
     TerrainKey,
@@ -33,7 +31,9 @@ export interface PathfindingPanelProps {
     width: number;
     height: number;
     algo: PathKey;
-    size: SizeKey;
+    /** Grid dimensions in cells. */
+    cols: number;
+    rows: number;
     speed: SpeedKey;
     maze: MazeKind;
     terrain: TerrainKey;
@@ -49,7 +49,8 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({
     width,
     height,
     algo,
-    size,
+    cols,
+    rows,
     speed,
     maze,
     terrain,
@@ -67,9 +68,11 @@ const PathfindingPanel: React.FC<PathfindingPanelProps> = ({
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const frameRef = useRef<HTMLDivElement | null>(null);
 
-    const cell = GRID_CELL[size];
-    const gridW = Math.max(5, Math.floor(box.w / cell));
-    const gridH = Math.max(5, Math.floor(box.h / cell));
+    // The grid is a fixed number of cells; cell size is whatever makes that
+    // fit the canvas, so the maze scales with the window instead of the count.
+    const gridW = Math.max(5, cols);
+    const gridH = Math.max(5, rows);
+    const cell = Math.max(3, Math.floor(Math.min(box.w / gridW, box.h / gridH)));
 
     const soundRef = useRef(sound);
     soundRef.current = sound;

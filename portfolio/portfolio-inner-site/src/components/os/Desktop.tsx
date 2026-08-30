@@ -10,6 +10,8 @@ import Toolbar from './Toolbar';
 import DesktopShortcut, { DesktopShortcutProps } from './DesktopShortcut';
 import Scrabble from '../applications/Scrabble';
 import AlgoViz from '../applications/AlgoViz';
+import SkillsApp from '../applications/SkillsApp';
+import { requestShowcaseRoute } from '../../utils/appBus';
 import { IconName } from '../../assets/icons';
 // import Credits from '../applications/Credits';
 
@@ -17,12 +19,16 @@ export interface DesktopProps {}
 
 type ExtendedWindowAppProps<T> = T & WindowAppProps;
 
+// An entry either owns a window (`component`) or is an alias that routes an
+// existing app to a path (`opens`) — Contact reuses the Showcase window rather
+// than standing up a second copy of the form.
 const APPLICATIONS: {
     [key in string]: {
         key: string;
         name: string;
         shortcutIcon: IconName;
-        component: React.FC<ExtendedWindowAppProps<any>>;
+        component?: React.FC<ExtendedWindowAppProps<any>>;
+        opens?: { app: string; path: string };
     };
 } = {
     // computer: {
@@ -67,6 +73,18 @@ const APPLICATIONS: {
         shortcutIcon: 'algovizIcon',
         component: AlgoViz,
     },
+    skills: {
+        key: 'skills',
+        name: 'Skills',
+        shortcutIcon: 'skillsIcon',
+        component: SkillsApp,
+    },
+    contact: {
+        key: 'contact',
+        name: 'Contact',
+        shortcutIcon: 'contactIcon',
+        opens: { app: 'showcase', path: '/contact' },
+    },
     // credits: {
     //     key: 'credits',
     //     name: 'Credits',
@@ -98,9 +116,16 @@ const Desktop: React.FC<DesktopProps> = (props) => {
                 shortcutName: app.name,
                 icon: app.shortcutIcon,
                 onOpen: () => {
+                    if (app.opens) {
+                        requestShowcaseRoute(app.opens.path);
+                        openOrFocus(app.opens.app);
+                        return;
+                    }
+                    const Component = app.component;
+                    if (!Component) return;
                     addWindow(
                         app.key,
-                        <app.component
+                        <Component
                             onInteract={() => onWindowInteract(app.key)}
                             onMinimize={() => minimizeWindow(app.key)}
                             onClose={() => removeWindow(app.key)}
@@ -206,6 +231,59 @@ const Desktop: React.FC<DesktopProps> = (props) => {
             }));
         },
         [getHighestZIndex]
+    );
+
+    /**
+     * Raise an app without remounting it. Reads window state through the
+     * functional setState form because the shortcut closures are built in a
+     * mount-only effect and would otherwise capture stale `windows`.
+     */
+    const openOrFocus = useCallback(
+        (key: string) => {
+            setWindows((prevState) => {
+                let highest = 0;
+                Object.keys(prevState).forEach((k) => {
+                    if (prevState[k].zIndex > highest)
+                        highest = prevState[k].zIndex;
+                });
+
+                // Already open: un-minimize and bring forward, keeping its route
+                // and position. Re-adding it here would remount the router.
+                if (prevState[key]) {
+                    return {
+                        ...prevState,
+                        [key]: {
+                            ...prevState[key],
+                            minimized: false,
+                            zIndex: highest + 1,
+                        },
+                    };
+                }
+
+                const target = APPLICATIONS[key];
+                const Component = target?.component;
+                if (!Component) return prevState;
+
+                return {
+                    ...prevState,
+                    [key]: {
+                        zIndex: highest + 1,
+                        minimized: false,
+                        component: (
+                            <Component
+                                onInteract={() => onWindowInteract(key)}
+                                onMinimize={() => minimizeWindow(key)}
+                                onClose={() => removeWindow(key)}
+                                key={key}
+                            />
+                        ),
+                        name: target.name,
+                        icon: target.shortcutIcon,
+                    },
+                };
+            });
+        },
+        [onWindowInteract, minimizeWindow, removeWindow]
     );
 
     return !shutdown ? (
