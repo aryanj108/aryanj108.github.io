@@ -31,7 +31,10 @@ const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = (props) => {
             minimizeWindow={props.onMinimize}
             bottomLeftText={'© Copyright 2026 Aryan Jalota'}
         >
-            <Router>
+            {/* basename keeps routing correct when served from a subpath
+                (PUBLIC_URL is '/os' in the build, '' in dev). Without it the
+                landing route never matches and the page renders empty. */}
+            <Router basename={process.env.PUBLIC_URL}>
                 <div className="site-page">
                     <VerticalNavbar />
                     <Routes>

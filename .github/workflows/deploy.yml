@@ -41,6 +41,7 @@ jobs:
           mkdir -p _site/os
           cp -r portfolio/portfolio-website/public/. _site/
           cp -r portfolio/portfolio-inner-site/build/. _site/os/
+          cp _site/os/index.html _site/os/404.html
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3

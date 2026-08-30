@@ -16,7 +16,7 @@ import ResumeDownload from './ResumeDownload';
 import cplusplus from '../../assets/icons/skills/cplusplus.svg';
 import python from '../../assets/icons/skills/python.svg';
 import go from '../../assets/icons/skills/go.svg';
-import openjdk from '../../assets/icons/skills/openjdk.svg';
+import java from '../../assets/icons/skills/java.svg';
 import typescript from '../../assets/icons/skills/typescript.svg';
 import javascript from '../../assets/icons/skills/javascript.svg';
 import nvidia from '../../assets/icons/skills/nvidia.svg';
@@ -40,6 +40,28 @@ import express from '../../assets/icons/skills/express.svg';
 import fastapi from '../../assets/icons/skills/fastapi.svg';
 import react from '../../assets/icons/skills/react.svg';
 import springboot from '../../assets/icons/skills/springboot.svg';
+import grpc from '../../assets/icons/skills/grpc.svg';
+import rocksdb from '../../assets/icons/skills/rocksdb.svg';
+
+// Concept icons (Material Symbols, tinted to each skill's accent color)
+import sql from '../../assets/icons/skills/sql.svg';
+import gpucomputing from '../../assets/icons/skills/gpucomputing.svg';
+import deeplearning from '../../assets/icons/skills/deeplearning.svg';
+import computervision from '../../assets/icons/skills/computervision.svg';
+import operatingsystems from '../../assets/icons/skills/operatingsystems.svg';
+import distributedsystems from '../../assets/icons/skills/distributedsystems.svg';
+import concurrency from '../../assets/icons/skills/concurrency.svg';
+import parallelcomputing from '../../assets/icons/skills/parallelcomputing.svg';
+import systemsprogramming from '../../assets/icons/skills/systemsprogramming.svg';
+import performanceoptimization from '../../assets/icons/skills/performanceoptimization.svg';
+import datastructures from '../../assets/icons/skills/datastructures.svg';
+import oop from '../../assets/icons/skills/oop.svg';
+import debugging from '../../assets/icons/skills/debugging.svg';
+import restapis from '../../assets/icons/skills/restapis.svg';
+import microservices from '../../assets/icons/skills/microservices.svg';
+import containers from '../../assets/icons/skills/containers.svg';
+import deltalake from '../../assets/icons/skills/deltalake.svg';
+import hdf5 from '../../assets/icons/skills/hdf5.svg';
 
 export interface SkillsProps {}
 
@@ -64,10 +86,10 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'C++17', icon: cplusplus },
             { name: 'Python', icon: python },
             { name: 'Go', icon: go },
-            { name: 'Java', icon: openjdk },
+            { name: 'Java', icon: java },
             { name: 'TypeScript', icon: typescript },
             { name: 'JavaScript', icon: javascript },
-            { name: 'SQL', color: '#e38c00' },
+            { name: 'SQL', icon: sql, color: '#e38c00' },
         ],
     },
     {
@@ -75,9 +97,9 @@ const SKILL_CATEGORIES: SkillCategory[] = [
         skills: [
             { name: 'CUDA', icon: nvidia },
             { name: 'PyTorch', icon: pytorch },
-            { name: 'GPU Computing', color: '#76b900' },
-            { name: 'Deep Learning', color: '#ee4c2c' },
-            { name: 'Computer Vision', color: '#5c3ee8' },
+            { name: 'GPU Computing', icon: gpucomputing, color: '#76b900' },
+            { name: 'Deep Learning', icon: deeplearning, color: '#ee4c2c' },
+            { name: 'Computer Vision', icon: computervision, color: '#5c3ee8' },
             { name: 'OpenCV', icon: opencv },
             { name: 'YOLOv8', icon: ultralytics },
             { name: 'NumPy', icon: numpy },
@@ -86,15 +108,43 @@ const SKILL_CATEGORIES: SkillCategory[] = [
     {
         title: 'Systems',
         skills: [
-            { name: 'Operating Systems', color: '#4d4d4d' },
-            { name: 'Distributed Systems', color: '#2f6fed' },
-            { name: 'Concurrency', color: '#8250df' },
-            { name: 'Parallel Computing', color: '#0f9d58' },
-            { name: 'Systems Programming', color: '#a42d0e' },
-            { name: 'Performance Optimization', color: '#d93025' },
-            { name: 'Data Structures & Algorithms', color: '#1a73e8' },
-            { name: 'Object-Oriented Programming', color: '#e37400' },
-            { name: 'Debugging', color: '#5f6368' },
+            {
+                name: 'Operating Systems',
+                icon: operatingsystems,
+                color: '#4d4d4d',
+            },
+            {
+                name: 'Distributed Systems',
+                icon: distributedsystems,
+                color: '#2f6fed',
+            },
+            { name: 'Concurrency', icon: concurrency, color: '#8250df' },
+            {
+                name: 'Parallel Computing',
+                icon: parallelcomputing,
+                color: '#0f9d58',
+            },
+            {
+                name: 'Systems Programming',
+                icon: systemsprogramming,
+                color: '#a42d0e',
+            },
+            {
+                name: 'Performance Optimization',
+                icon: performanceoptimization,
+                color: '#d93025',
+            },
+            {
+                name: 'Data Structures & Algorithms',
+                icon: datastructures,
+                color: '#1a73e8',
+            },
+            {
+                name: 'Object-Oriented Programming',
+                icon: oop,
+                color: '#e37400',
+            },
+            { name: 'Debugging', icon: debugging, color: '#5f6368' },
         ],
     },
     {
@@ -106,10 +156,10 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'AWS', icon: aws },
             { name: 'Git', icon: git },
             { name: 'CI/CD', icon: githubactions },
-            { name: 'gRPC', color: '#2496ed' },
-            { name: 'REST APIs', color: '#009688' },
-            { name: 'Microservices', color: '#6d4aff' },
-            { name: 'Containers', color: '#0db7ed' },
+            { name: 'gRPC', icon: grpc, color: '#2496ed' },
+            { name: 'REST APIs', icon: restapis, color: '#009688' },
+            { name: 'Microservices', icon: microservices, color: '#6d4aff' },
+            { name: 'Containers', icon: containers, color: '#0db7ed' },
         ],
     },
     {
@@ -120,9 +170,9 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'MySQL', icon: mysql },
             { name: 'SQLite', icon: sqlite },
             { name: 'Redis', icon: redis },
-            { name: 'Delta Lake', color: '#00add4' },
-            { name: 'RocksDB', color: '#2f74c0' },
-            { name: 'HDF5', color: '#0064a5' },
+            { name: 'Delta Lake', icon: deltalake, color: '#00add4' },
+            { name: 'RocksDB', icon: rocksdb, color: '#2f74c0' },
+            { name: 'HDF5', icon: hdf5, color: '#0064a5' },
         ],
     },
     {
