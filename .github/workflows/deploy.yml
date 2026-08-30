@@ -33,7 +33,7 @@ jobs:
       - name: Install and build portfolio-website (3D scene)
         working-directory: portfolio/portfolio-website
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Assemble site
