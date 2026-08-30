@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import FreeCamToggle from './FreeCamToggle';
 import MuteToggle from './MuteToggle';
+import MusicToggle from './MusicToggle';
 
 interface InfoOverlayProps {
     visible: boolean;
@@ -21,6 +22,7 @@ const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
     const [textDone, setTextDone] = useState(false);
     const [volumeVisible, setVolumeVisible] = useState(false);
     const [freeCamVisible, setFreeCamVisible] = useState(false);
+    const [musicVisible, setMusicVisible] = useState(false);
 
     const typeText = (
         i: number,
@@ -84,6 +86,9 @@ const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
                 setVolumeVisible(true);
                 setTimeout(() => {
                     setFreeCamVisible(true);
+                    setTimeout(() => {
+                        setMusicVisible(true);
+                    }, 250);
                 }, 250);
             }, 250);
         }
@@ -91,7 +96,7 @@ const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
 
     useEffect(() => {
         window.postMessage({ type: 'keydown', key: `_AUTO_` }, '*');
-    }, [freeCamVisible, volumeVisible]);
+    }, [freeCamVisible, volumeVisible, musicVisible]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -136,6 +141,11 @@ const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
                     {freeCamVisible && (
                         <div style={styles.lastRowChild}>
                             <FreeCamToggle />
+                        </div>
+                    )}
+                    {musicVisible && (
+                        <div style={styles.lastRowChild}>
+                            <MusicToggle />
                         </div>
                     )}
                 </div>

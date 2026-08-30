@@ -4,13 +4,17 @@ import ResumeDownload from '../ResumeDownload';
 export interface SoftwareProjectsProps {}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SOFTWARE PROJECTS  (Aryan Jalota)
+// SOFTWARE PROJECTS
 // -----------------------------------------------------------------------------
-// Each project is a <div className="text-block"> with an <h2> title, a
-// tech-stack line, a paragraph, and a "Links" list. To showcase a screenshot or
-// gif, drop it in src/assets/pictures/projects/software/ and render it inside a
-// <div className="captioned-image"> (see the original repo's VideoAsset usage).
-// TODO: replace the GitHub profile links below with each project's repo URL.
+// Each project is a text-block div with an h2 title, an italic tech-stack line,
+// a summary paragraph, and a bulleted list of specifics.
+//
+// Per-project "Links:" sections are currently commented out until real repo and
+// demo URLs exist. To restore one, uncomment its block — and uncomment the
+// GITHUB constant below if you still want the profile fallback.
+//
+// To add a screenshot, drop it in src/assets/pictures/projects/software/ and
+// render it inside a captioned-image div.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Project links are commented out for now; restore this alongside them.
@@ -31,23 +35,97 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
             <ResumeDownload />
             <br />
 
+            {/* ── Interactive 3D Portfolio (this site) ────────────────────── */}
+            <div className="text-block">
+                <h2>Interactive 3D Portfolio</h2>
+                <br />
+                <p>
+                    <i>
+                        TypeScript &middot; Three.js &middot; WebGL &middot; GLSL
+                        &middot; React &middot; Webpack 5 &middot; Web Audio API
+                        &middot; GitHub Actions
+                    </i>
+                </p>
+                <br />
+                <p>
+                    The site you are currently using. A real-time WebGL office
+                    scene you can navigate freely, with a fully functional
+                    Windows 95-style desktop running live inside the CRT
+                    monitor — not a video or a texture, but an actual web app
+                    composited into 3D space.
+                </p>
+                <br />
+                <ul>
+                    <li>
+                        <p>
+                            Rendered the in-scene monitor with Three.js
+                            CSS3DRenderer, compositing a live iframe into the
+                            WebGL scene and occluding it correctly with a
+                            NoBlending GL plane so 3D geometry can pass in
+                            front of the screen.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Bridged pointer and keyboard events across the
+                            iframe boundary via postMessage, remapping
+                            coordinates through the screen's transform so the
+                            camera reacts to input that originates inside the
+                            embedded desktop.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Built a positional Web Audio layer — mechanical
+                            keyboard and mouse samples, ambient office tone,
+                            and a switchable music player — with distance
+                            attenuation and lowpass filtering driven by camera
+                            position.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Optimized delivery of a large asset set using
+                            Draco-compressed GLB geometry, compressed texture
+                            layers, and lazy-loaded audio, keeping heavy media
+                            off the critical path.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Wrote the desktop environment as a separate React
+                            and TypeScript single-page app implementing
+                            draggable and resizable windows, a taskbar with
+                            z-order management, and a router-driven showcase,
+                            plus emulated DOS titles through js-dos.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Automated deployment with GitHub Actions, building
+                            both applications and composing them into a single
+                            static site published to GitHub Pages on every
+                            push to main.
+                        </p>
+                    </li>
+                </ul>
+            </div>
+
             {/* ── Distributed Lakehouse Analytics Platform ───────────────── */}
             <div className="text-block">
                 <h2>Distributed Lakehouse Analytics Platform</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; Apache Spark &middot; Delta Lake
                             &middot; FastAPI &middot; Redis
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
                     A distributed lakehouse built on Apache Spark and Delta Lake
                     supporting ACID transactions and SQL analytics across{' '}
-                    <b>500M+ records</b>. I designed the storage and query
+                    500M+ records. I designed the storage and query
                     layers so that large-scale analytical workloads stay
                     consistent and fast even under concurrent reads and writes.
                 </p>
@@ -89,17 +167,15 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Distributed Search Engine</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             C++ &middot; Go &middot; gRPC &middot; Redis &middot;
                             RocksDB &middot; Docker
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
                     A sharded, distributed search engine indexing{' '}
-                    <b>10M+ documents</b> with inverted indexes and BM25 ranking
+                    10M+ documents with inverted indexes and BM25 ranking
                     at sub-100&nbsp;ms query latency. The system spreads work
                     across shards using consistent hashing and a multithreaded
                     indexing pipeline.
@@ -143,17 +219,15 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>High-Performance Trading Engine</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             C++17 &middot; Multithreading &middot; Linux &middot;
                             CMake &middot; Google Benchmark
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
                     A low-latency limit order book engineered in modern C++17,
-                    processing <b>1M+ market events/sec</b>. I focused on
+                    processing 1M+ market events/sec. I focused on
                     cache-efficient data structures and custom memory management
                     to keep the hot path fast, and validated everything with
                     Google Benchmark.
@@ -196,12 +270,10 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Longhorn Life Sciences — iDetect</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Expo &middot; React Native &middot; TypeScript
                             &middot; Firebase &middot; BLE (react-native-ble-plx)
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -256,13 +328,11 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>LLM Analytics Agent</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; FastAPI &middot; PostgreSQL
                             &middot; LangChain &middot; OpenAI API &middot;
                             Redis &middot; AWS
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -318,13 +388,11 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Longhorn Living</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             React Native (TypeScript) &middot; Expo &middot;
                             Firebase (Auth/Firestore) &middot; React Native
                             Maps &middot; LocationIQ
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -401,12 +469,10 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Hook Em' Hacks Website</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Vanilla JavaScript &middot; HTML/CSS &middot;
                             Vercel
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -478,12 +544,10 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>AI Parking Monitoring Lab</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; Flask &middot; Ultralytics YOLO
                             &middot; OpenCV &middot; PyTorch &middot; Pandas
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -533,12 +597,10 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>ASL Translator</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; OpenCV &middot; MediaPipe &middot;
                             scikit-learn &middot; Streamlit
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -597,9 +659,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Notes Sharing Platform</h2>
                 <br />
                 <p>
-                    <b>
                         <i>Spring Boot &middot; React.js &middot; AWS S3</i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -653,13 +713,11 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>PDF Data Extraction Toolkit</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; Tkinter &middot; Streamlit &middot;
                             PyMuPDF &middot; pdfplumber &middot; pandas &middot;
                             openpyxl
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -673,7 +731,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <ul>
                     <li>
                         <p>
-                            <b>Desktop GUI (Tkinter):</b> click-and-drag to
+                            Desktop GUI (Tkinter): click-and-drag to
                             "snip" table or free-text regions on a rendered PDF
                             (via PyMuPDF), then auto-detect and extract every
                             matching region across the document using header
@@ -686,7 +744,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                     </li>
                     <li>
                         <p>
-                            <b>Streamlit &amp; CLI batch versions:</b> a
+                            Streamlit &amp; CLI batch versions: a
                             browser-based multi-PDF upload tool and a
                             folder-based batch processor, sharing the same
                             dual-strategy pdfplumber extraction and fuzzy
@@ -720,13 +778,11 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>SnapSteps</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; pyautogui &middot; pynput &middot;
                             pytesseract (OCR) &middot; Pillow &middot; ReportLab
                             &middot; Tkinter
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -779,12 +835,10 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                 <h2>Volleyball Video Analysis Platform</h2>
                 <br />
                 <p>
-                    <b>
                         <i>
                             Python &middot; PyTorch &middot; YOLOv8 &middot;
                             OpenCV &middot; Computer Vision &middot; React
                         </i>
-                    </b>
                 </p>
                 <br />
                 <p>
@@ -799,7 +853,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                     <li>
                         <p>
                             Built a computer vision pipeline using{' '}
-                            <b>YOLOv8 and PyTorch</b> to detect and track
+                            YOLOv8 and PyTorch to detect and track
                             volleyball players across recorded match footage,
                             providing the foundation for automated player and
                             play analysis.
@@ -808,7 +862,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                     <li>
                         <p>
                             Developed video-processing workflows with{' '}
-                            <b>OpenCV</b> to extract frames, synchronize
+                            OpenCV to extract frames, synchronize
                             detections across time, and convert raw match
                             footage into structured data for downstream
                             analysis.
