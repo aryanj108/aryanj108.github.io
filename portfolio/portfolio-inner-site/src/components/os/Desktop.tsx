@@ -101,6 +101,29 @@ const APPLICATIONS: {
  * that captured `windows` would keep seeing the empty map from first render and
  * every newly opened app would land at z-index 1, behind the others.
  */
+const ICON_SLOT_HEIGHT_MAX = 104;
+const ICON_SLOT_HEIGHT_MIN = 64;
+const ICONS_TOP_OFFSET = 16; // matches styles.shortcuts.top
+const TASKBAR_HEIGHT = 32;
+
+/**
+ * Vertical space between shortcuts. A single column is intentional, not an
+ * oversight: DesktopShortcut is exactly 56px wide, matching the Showcase
+ * window's default `left: 56` in ShowcaseExplorer.tsx, so the column peeks
+ * out just to the left of the window that auto-opens on every load. Windows
+ * render with an explicit z-index and the icon layer has none, so a second
+ * column would sit UNDER that window and be invisible, not just relocated --
+ * confirmed locally: Skills and Contact rendered at the right DOM position
+ * but were fully hidden behind Showcase. Shrinking the pitch so everything
+ * still fits in that one column is what actually keeps every icon visible.
+ */
+const computeIconSlotHeight = (): number => {
+    const count = Object.keys(APPLICATIONS).length;
+    const available = window.innerHeight - ICONS_TOP_OFFSET - TASKBAR_HEIGHT;
+    const fitted = Math.floor(available / count);
+    return Math.max(ICON_SLOT_HEIGHT_MIN, Math.min(ICON_SLOT_HEIGHT_MAX, fitted));
+};
+
 const highestZ = (ws: DesktopWindows): number => {
     let top = 0;
     Object.keys(ws).forEach((key) => {
@@ -117,6 +140,20 @@ const Desktop: React.FC<DesktopProps> = (props) => {
 
     const [shutdown, setShutdown] = useState(false);
     const [numShutdowns, setNumShutdowns] = useState(1);
+
+    // Without this, the fixed 104px pitch silently ran shortcuts off the
+    // bottom of the screen as more apps were added -- e.g. Contact disappeared
+    // entirely on shorter windows once the list grew past what a typical
+    // viewport's height could show.
+    const [iconSlotHeight, setIconSlotHeight] = useState(() =>
+        computeIconSlotHeight()
+    );
+
+    useEffect(() => {
+        const onResize = () => setIconSlotHeight(computeIconSlotHeight());
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
 
     useEffect(() => {
         if (shutdown === true) {
@@ -304,7 +341,7 @@ const Desktop: React.FC<DesktopProps> = (props) => {
                     return (
                         <div
                             style={Object.assign({}, styles.shortcutContainer, {
-                                top: i * 104,
+                                top: i * iconSlotHeight,
                             })}
                             key={shortcut.shortcutName}
                         >
