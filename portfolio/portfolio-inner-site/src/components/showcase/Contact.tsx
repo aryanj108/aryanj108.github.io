@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { track } from '../../utils/analytics';
 import colors from '../../constants/colors';
 import ghIcon from '../../assets/pictures/contact-gh.png';
 import inIcon from '../../assets/pictures/contact-in.png';
@@ -106,6 +107,7 @@ const Contact: React.FC<ContactProps> = (props) => {
                 message?: string;
             };
             if (data.success) {
+                track('contact-submitted');
                 setFormMessage(`Message successfully sent. Thank you ${name}!`);
                 setCompany('');
                 setEmail('');

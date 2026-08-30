@@ -112,21 +112,11 @@
 
   <link rel="shortcut icon" href="../static/images/favicon.ico" type="image/x-icon">
 
-  <!-- ─────────────────────────────────────────────────────────────────────
-       CUSTOMIZE: Google Analytics. The original site's tracking ID has been
-       removed so no analytics are reported to it. To enable your own, paste
-       your GA4 Measurement ID (G-XXXXXXXXXX) below and uncomment this block.
-       ───────────────────────────────────────────────────────────────────── -->
-  <!--
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
-  -->
+  <!-- Umami analytics (privacy-first, cookieless — no consent banner needed).
+       Same website ID is used by the /os/ app so one visit reads as one
+       session across both. -->
+  <script defer src="https://cloud.umami.is/script.js"
+    data-website-id="4e1bb33c-9e66-461e-8651-ad70b0a363af"></script>
 
 </head>
 

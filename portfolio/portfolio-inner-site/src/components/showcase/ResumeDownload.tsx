@@ -1,4 +1,5 @@
 import React from 'react';
+import { track } from '../../utils/analytics';
 import printer from '../../assets/resume/printer.gif';
 // CUSTOMIZE: swap this PDF (src/assets/resume/) to update the downloadable resume
 import Resume from '../../assets/resume/Aryan_Jalota_Resume.pdf';
@@ -13,7 +14,12 @@ const ResumeDownload: React.FC<ResumeDownloadProps> = ({ altText }) => {
             <img style={styles.resumePrinter} alt="" src={printer} />
             <div style={styles.resumeContainerText}>
                 <h3>{altText ? altText : 'Looking for my resume?'}</h3>
-                <a rel="noreferrer" target="_blank" href={Resume}>
+                <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href={Resume}
+                    onClick={() => track('resume-download')}
+                >
                     <p>Click here to download it!</p>
                 </a>
             </div>
