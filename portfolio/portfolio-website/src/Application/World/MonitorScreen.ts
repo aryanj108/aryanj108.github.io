@@ -193,7 +193,7 @@ export default class MonitorScreen extends EventEmitter {
         // the default and localhost is only used when the page is opened with
         // the ?dev query param.
         // ─────────────────────────────────────────────────────────────────
-        const OS_PROD_URL = ''; // e.g. 'https://os.yourdomain.com/'
+        const OS_PROD_URL = 'https://aryanj108.github.io/os/';
         const OS_DEV_URL = 'http://localhost:3000/';
 
         // Use the production URL if configured, otherwise fall back to the
