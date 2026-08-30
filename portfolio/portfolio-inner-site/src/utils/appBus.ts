@@ -11,6 +11,10 @@
 
 const SHOWCASE_ROUTE_EVENT = 'showcase:navigate';
 
+// CRA replaces this at build time ("/os" in production, "" in dev), same
+// as the basename ShowcaseExplorer's <Router> uses.
+const BASE = process.env.PUBLIC_URL || '';
+
 let pendingRoute: string | null = null;
 
 /** Ask the Showcase window to show `path`, whether or not it is open yet. */
@@ -41,4 +45,18 @@ export const onShowcaseRoute = (
     };
     document.addEventListener(SHOWCASE_ROUTE_EVENT, listener);
     return () => document.removeEventListener(SHOWCASE_ROUTE_EVENT, listener);
+};
+
+/**
+ * Reset the browser's address bar to the Showcase root before a fresh
+ * window is mounted.
+ *
+ * ShowcaseExplorer's <BrowserRouter> reads window.location once, at mount.
+ * Because this is a real browser URL rather than app state, it survives
+ * closing and reopening the window within the same page load — so without
+ * this, reopening Showcase after having navigated to, say, /contact would
+ * silently resume on /contact instead of starting over at Home.
+ */
+export const resetShowcaseRoute = (): void => {
+    window.history.replaceState(null, '', `${BASE}/`);
 };

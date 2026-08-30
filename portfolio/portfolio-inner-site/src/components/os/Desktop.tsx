@@ -11,7 +11,7 @@ import DesktopShortcut, { DesktopShortcutProps } from './DesktopShortcut';
 import Scrabble from '../applications/Scrabble';
 import AlgoViz from '../applications/AlgoViz';
 import SkillsApp from '../applications/SkillsApp';
-import { requestShowcaseRoute } from '../../utils/appBus';
+import { requestShowcaseRoute, resetShowcaseRoute } from '../../utils/appBus';
 import { IconName } from '../../assets/icons';
 // import Credits from '../applications/Credits';
 
@@ -138,26 +138,25 @@ const Desktop: React.FC<DesktopProps> = (props) => {
                         openOrFocus(app.opens.app);
                         return;
                     }
-                    const Component = app.component;
-                    if (!Component) return;
-                    addWindow(
+                    if (!app.component) return;
+                    // Raise the app if it's already open (instead of
+                    // remounting it) so an in-progress game or the Showcase's
+                    // current page survives clicking its icon again — the
+                    // same "raise, don't restart" behaviour a real desktop
+                    // OS has. Showcase additionally resets to Home, but only
+                    // in the fresh-open branch inside openOrFocus.
+                    openOrFocus(
                         app.key,
-                        <Component
-                            onInteract={() => onWindowInteract(app.key)}
-                            onMinimize={() => minimizeWindow(app.key)}
-                            onClose={() => removeWindow(app.key)}
-                            key={app.key}
-                        />
+                        app.key === 'showcase' ? resetShowcaseRoute : undefined
                     );
                 },
             });
         });
 
-        newShortcuts.forEach((shortcut) => {
-            if (shortcut.shortcutName === 'My Showcase') {
-                shortcut.onOpen();
-            }
-        });
+        // Respects whatever URL the page loaded with (deep-link support for a
+        // shared /os/<page> link) — unlike the shortcut's own onOpen above,
+        // this intentionally does NOT reset the route.
+        openOrFocus('showcase');
 
         setShortcuts(newShortcuts);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,21 +224,6 @@ const Desktop: React.FC<DesktopProps> = (props) => {
         }, 600);
     }, [numShutdowns]);
 
-    const addWindow = useCallback(
-        (key: string, element: JSX.Element) => {
-            setWindows((prevState) => ({
-                ...prevState,
-                [key]: {
-                    zIndex: highestZ(prevState) + 1,
-                    minimized: false,
-                    component: element,
-                    name: APPLICATIONS[key].name,
-                    icon: APPLICATIONS[key].shortcutIcon,
-                },
-            }));
-        },
-        []
-    );
 
     /**
      * Raise an app without remounting it. Reads window state through the
@@ -247,7 +231,7 @@ const Desktop: React.FC<DesktopProps> = (props) => {
      * mount-only effect and would otherwise capture stale `windows`.
      */
     const openOrFocus = useCallback(
-        (key: string) => {
+        (key: string, onFreshOpen?: () => void) => {
             setWindows((prevState) => {
                 const highest = highestZ(prevState);
 
@@ -263,6 +247,8 @@ const Desktop: React.FC<DesktopProps> = (props) => {
                         },
                     };
                 }
+
+                onFreshOpen?.();
 
                 const target = APPLICATIONS[key];
                 const Component = target?.component;
