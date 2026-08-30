@@ -93,6 +93,23 @@ const APPLICATIONS: {
     // },
 };
 
+/**
+ * Highest z-index currently in use.
+ *
+ * Takes the window map as an argument rather than closing over state: the
+ * desktop shortcut handlers are built once in a mount-only effect, so anything
+ * that captured `windows` would keep seeing the empty map from first render and
+ * every newly opened app would land at z-index 1, behind the others.
+ */
+const highestZ = (ws: DesktopWindows): number => {
+    let top = 0;
+    Object.keys(ws).forEach((key) => {
+        const w = ws[key];
+        if (w && w.zIndex > top) top = w.zIndex;
+    });
+    return top;
+};
+
 const Desktop: React.FC<DesktopProps> = (props) => {
     const [windows, setWindows] = useState<DesktopWindows>({});
 
@@ -169,45 +186,36 @@ const Desktop: React.FC<DesktopProps> = (props) => {
         });
     }, []);
 
-    const getHighestZIndex = useCallback((): number => {
-        let highestZIndex = 0;
-        Object.keys(windows).forEach((key) => {
-            const window = windows[key];
-            if (window) {
-                if (window.zIndex > highestZIndex)
-                    highestZIndex = window.zIndex;
-            }
+    const toggleMinimize = useCallback((key: string) => {
+        setWindows((prevWindows) => {
+            const target = prevWindows[key];
+            if (!target) return prevWindows;
+            const top = highestZ(prevWindows);
+            const minimized =
+                target.minimized || target.zIndex === top
+                    ? !target.minimized
+                    : target.minimized;
+            return {
+                ...prevWindows,
+                [key]: { ...target, minimized, zIndex: top + 1 },
+            };
         });
-        return highestZIndex;
-    }, [windows]);
-
-    const toggleMinimize = useCallback(
-        (key: string) => {
-            const newWindows = { ...windows };
-            const highestIndex = getHighestZIndex();
-            if (
-                newWindows[key].minimized ||
-                newWindows[key].zIndex === highestIndex
-            ) {
-                newWindows[key].minimized = !newWindows[key].minimized;
-            }
-            newWindows[key].zIndex = getHighestZIndex() + 1;
-            setWindows(newWindows);
-        },
-        [windows, getHighestZIndex]
-    );
+    }, []);
 
     const onWindowInteract = useCallback(
         (key: string) => {
-            setWindows((prevWindows) => ({
-                ...prevWindows,
-                [key]: {
-                    ...prevWindows[key],
-                    zIndex: 1 + getHighestZIndex(),
-                },
-            }));
+            setWindows((prevWindows) => {
+                if (!prevWindows[key]) return prevWindows;
+                return {
+                    ...prevWindows,
+                    [key]: {
+                        ...prevWindows[key],
+                        zIndex: highestZ(prevWindows) + 1,
+                    },
+                };
+            });
         },
-        [setWindows, getHighestZIndex]
+        []
     );
 
     const startShutdown = useCallback(() => {
@@ -222,7 +230,7 @@ const Desktop: React.FC<DesktopProps> = (props) => {
             setWindows((prevState) => ({
                 ...prevState,
                 [key]: {
-                    zIndex: getHighestZIndex() + 1,
+                    zIndex: highestZ(prevState) + 1,
                     minimized: false,
                     component: element,
                     name: APPLICATIONS[key].name,
@@ -230,7 +238,7 @@ const Desktop: React.FC<DesktopProps> = (props) => {
                 },
             }));
         },
-        [getHighestZIndex]
+        []
     );
 
     /**
@@ -241,11 +249,7 @@ const Desktop: React.FC<DesktopProps> = (props) => {
     const openOrFocus = useCallback(
         (key: string) => {
             setWindows((prevState) => {
-                let highest = 0;
-                Object.keys(prevState).forEach((k) => {
-                    if (prevState[k].zIndex > highest)
-                        highest = prevState[k].zIndex;
-                });
+                const highest = highestZ(prevState);
 
                 // Already open: un-minimize and bring forward, keeping its route
                 // and position. Re-adding it here would remount the router.

@@ -109,6 +109,22 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         </p>
                     </li>
                 </ul>
+                <br />
+                <h3>Links:</h3>
+                <ul>
+                    <li>
+                        <a
+                            rel="noreferrer"
+                            target="_blank"
+                            href="https://aryanj108.github.io/os/"
+                        >
+                            <p>
+                                [Live Site] - The desktop also runs on its own
+                                as a standalone website, outside the 3D scene
+                            </p>
+                        </a>
+                    </li>
+                </ul>
             </div>
 
             {/* ── Distributed Lakehouse Analytics Platform ───────────────── */}

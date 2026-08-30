@@ -222,7 +222,7 @@ const SkillsView: React.FC<SkillsViewProps> = () => {
         <div style={styles.page}>
             {SKILL_CATEGORIES.map((category) => (
                 <div key={category.title} style={styles.section}>
-                    <h1 style={styles.heading}>{category.title}</h1>
+                    <h2 style={styles.heading}>{category.title}</h2>
                     <div style={styles.grid}>
                         {category.skills.map((skill) => (
                             <SkillRow key={skill.name} skill={skill} />
@@ -248,48 +248,50 @@ const styles: StyleSheetCSS = {
     },
     section: {
         flexDirection: 'column',
-        marginBottom: 28,
+        marginBottom: 32,
         width: '100%',
     },
     heading: {
-        marginBottom: 16,
+        fontSize: 22,
+        marginBottom: 18,
     },
     grid: {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        columnGap: 24,
-        rowGap: 14,
+        columnGap: 28,
+        rowGap: 18,
         width: '100%',
     },
     row: {
         alignItems: 'center',
     },
     iconWrap: {
-        width: 28,
-        height: 28,
-        minWidth: 28,
-        marginRight: 12,
+        width: 38,
+        height: 38,
+        minWidth: 38,
+        marginRight: 16,
         alignItems: 'center',
         justifyContent: 'center',
     },
     icon: {
-        maxWidth: 28,
-        maxHeight: 28,
+        maxWidth: 38,
+        maxHeight: 38,
         objectFit: 'contain',
     },
     monogram: {
-        width: 28,
-        height: 28,
-        borderRadius: 4,
+        width: 38,
+        height: 38,
+        borderRadius: 5,
         color: 'white',
         fontWeight: 'bold',
-        fontSize: 10,
+        fontSize: 13,
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
     },
     label: {
-        lineHeight: 1.1,
+        fontSize: 16,
+        lineHeight: 1.15,
     },
 };
 
