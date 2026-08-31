@@ -232,6 +232,16 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                 </div>
             </div>
             <div className="text-block">
+                <p>
+                    <i>
+                        Python &middot; React.js &middot; JavaScript &middot;
+                        HTML &middot; Geospatial APIs &middot; High-Performance
+                        Computing (TACC) &middot; Model Training &amp;
+                        Evaluation &middot; Remote Sensing &amp; Geospatial
+                        Data
+                    </i>
+                </p>
+                <br />
                 <ul>
                     <li>
                         <p>
@@ -283,6 +293,13 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                 </div>
             </div>
             <div className="text-block">
+                <p>
+                    <i>
+                        Python &middot; Tesseract OCR &middot; Tkinter &middot;
+                        Pandas
+                    </i>
+                </p>
+                <br />
                 <ul>
                     <li>
                         <p>
@@ -345,6 +362,15 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                 </div>
             </div>
             <div className="text-block">
+                <p>
+                    <i>
+                        YOLOv8 &middot; OpenCV &middot; Matplotlib &middot;
+                        Object Detection &amp; Segmentation &middot; Computer
+                        Vision &middot; Machine Learning &middot; Traffic
+                        Analytics &middot; Data Analysis
+                    </i>
+                </p>
+                <br />
                 <ul>
                     <li>
                         <p>
