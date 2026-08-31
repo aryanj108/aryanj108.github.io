@@ -563,6 +563,7 @@ const SoftwareProjects: React.FC<SoftwareProjectsProps> = (props) => {
                         <i>
                             Python &middot; Flask &middot; Ultralytics YOLO
                             &middot; OpenCV &middot; PyTorch &middot; Pandas
+                            &middot; Matplotlib
                         </i>
                 </p>
                 <br />
