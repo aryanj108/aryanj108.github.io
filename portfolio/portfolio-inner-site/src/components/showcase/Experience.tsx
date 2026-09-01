@@ -249,7 +249,7 @@ const Experience: React.FC<ExperienceProps> = (props) => {
             <div style={styles.headerContainer}>
                 <div style={styles.header}>
                     <div style={styles.headerRow}>
-                        <h1>UT Austin</h1>
+                        <h1>GISense Lab &ndash; The University of Texas at Austin</h1>
                         <a
                             rel="noreferrer"
                             target="_blank"
@@ -259,14 +259,14 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                         </a>
                     </div>
                     <div style={styles.headerRow}>
-                        <h3>Undergraduate Research SWE &middot; Geospatial ML</h3>
+                        <h3>Undergraduate Research Software Engineer &ndash; Multimodal AI</h3>
                         <b>
                             <p>Aug 2025 - May 2026</p>
                         </b>
                     </div>
                     <div style={styles.headerRow}>
                         <p>
-                            <i>The University of Texas at Austin &middot; Austin, TX</i>
+                            <i>Austin, TX</i>
                         </p>
                     </div>
                 </div>
@@ -360,7 +360,7 @@ const Experience: React.FC<ExperienceProps> = (props) => {
             <div style={styles.headerContainer}>
                 <div style={styles.header}>
                     <div style={styles.headerRow}>
-                        <h1>UT Austin</h1>
+                        <h1>Traffic Monitoring Lab &ndash; The University of Texas at Austin</h1>
                         <a
                             rel="noreferrer"
                             target="_blank"
@@ -371,7 +371,7 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </div>
                     <div style={styles.headerRow}>
                         <h3>
-                            Undergraduate Research SWE &middot; Computer Vision
+                            Undergraduate Research Software Engineer &ndash; Computer Vision
                         </h3>
                         <b>
                             <p>Aug 2024 - May 2026</p>
@@ -379,7 +379,7 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </div>
                     <div style={styles.headerRow}>
                         <p>
-                            <i>The University of Texas at Austin &middot; Austin, TX</i>
+                            <i>Austin, TX</i>
                         </p>
                     </div>
                 </div>
