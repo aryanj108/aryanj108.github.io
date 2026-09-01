@@ -59,6 +59,24 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </li>
                     <li>
                         <p>
+                            Built the agent on Headless360 to operate across
+                            Slack, Google Workspace, and Zoom/Google Meet with
+                            direct access to sensitive organizational data,
+                            tuning it specifically to the CEO&rsquo;s workflows
+                            to help him run the company with faster, more
+                            accurate information.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Worked across engineering and cross-functional
+                            stakeholder teams to gather requirements, evaluate
+                            technical tradeoffs, and iterate on production
+                            workflows.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
                             Improved AI query accuracy from 21% to 95% and
                             reduced p50 latency 5&times; through deterministic
                             entity resolution, LLM routing, and multi-layer
@@ -75,6 +93,15 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </li>
                     <li>
                         <p>
+                            Collaborated closely with senior Salesforce
+                            executives, including the SVP and Chief of Staff to
+                            the CEO, culminating in a final in-person
+                            presentation of the project to Marc Benioff and
+                            15+ members of his executive leadership team.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
                             Improved deployment reliability and scalability by
                             migrating a production backend from SQLite to
                             PostgreSQL across 20+ tables and implementing
@@ -83,8 +110,21 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </li>
                     <li>
                         <p>
-                            Engineered facial-recognition speaker verification using ArcFace 
-                            embeddings, liveness detection, and AES-256-GCM encrypted storage, 
+                            Traveled on behalf of Salesforce to World Tour and
+                            customer conferences in Chicago, London, and
+                            Hawaii, speaking with 30+ customers and partners
+                            &mdash; including Bobbi, TIME Magazine, the Texas
+                            Department of Public Safety, Ring, Southwest
+                            Airlines, F1, Fin, Qualified, Sierra, and more
+                            &mdash; on how the Salesforce narrative and product
+                            delivery should evolve alongside AI, and reporting
+                            findings back to Salesforce leadership.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            Engineered facial-recognition speaker verification using ArcFace
+                            embeddings, liveness detection, and AES-256-GCM encrypted storage,
                             restricting meeting-bot responses to verified executive users.
                         </p>
                     </li>
