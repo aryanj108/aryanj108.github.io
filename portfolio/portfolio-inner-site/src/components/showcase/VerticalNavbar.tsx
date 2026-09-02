@@ -9,7 +9,6 @@ export interface VerticalNavbarProps {}
 
 const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
     const location = useLocation();
-    const [projectsExpanded, setProjectsExpanded] = useState(false);
     const [isHome, setIsHome] = useState(false);
 
     const navigate = useNavigate();
@@ -18,11 +17,6 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
     };
 
     useEffect(() => {
-        if (location.pathname.includes('/projects')) {
-            setProjectsExpanded(true);
-        } else {
-            setProjectsExpanded(false);
-        }
         if (location.pathname === '/') {
             setIsHome(true);
         } else {
@@ -53,27 +47,10 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
                     text="EXPERIENCE"
                 />
                 <Link
-                    containerStyle={Object.assign(
-                        {},
-                        styles.link,
-                        projectsExpanded && styles.expandedLink
-                    )}
-                    to="projects"
+                    containerStyle={styles.link}
+                    to="projects/software"
                     text="PROJECTS"
                 />
-                {
-                    // if current path contains projects
-                    // Music & Art inset links removed — only Software remains.
-                    projectsExpanded && (
-                        <div style={styles.insetLinks}>
-                            <Link
-                                containerStyle={styles.insetLink}
-                                to="projects/software"
-                                text="SOFTWARE"
-                            />
-                        </div>
-                    )
-                }
                 <Link
                     containerStyle={styles.link}
                     to="contact"
@@ -117,17 +94,6 @@ const styles: StyleSheetCSS = {
     },
     link: {
         marginBottom: 32,
-    },
-    expandedLink: {
-        marginBottom: 16,
-    },
-    insetLinks: {
-        flexDirection: 'column',
-        marginLeft: 32,
-        marginBottom: 16,
-    },
-    insetLink: {
-        marginBottom: 8,
     },
     links: {
         flexDirection: 'column',

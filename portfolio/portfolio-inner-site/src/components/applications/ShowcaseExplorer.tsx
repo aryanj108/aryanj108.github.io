@@ -3,6 +3,7 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
+    Navigate,
     useNavigate,
 } from 'react-router-dom';
 import Home from '../showcase/Home';
@@ -10,7 +11,9 @@ import About from '../showcase/About';
 import Window from '../os/Window';
 import Education from '../showcase/Education';
 import Experience from '../showcase/Experience';
-import Projects from '../showcase/Projects';
+// Projects category landing page — currently skipped (see the /projects
+// route below), kept here in case a second project category gets added back.
+// import Projects from '../showcase/Projects';
 import Contact from '../showcase/Contact';
 import SoftwareProjects from '../showcase/projects/Software';
 // Music & Art project pages removed (Henry-specific hobbies). To re-add your own,
@@ -66,7 +69,13 @@ const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = (props) => {
                         <Route path="/about" element={<About />} />
                         <Route path="/education" element={<Education />} />
                         <Route path="/experience" element={<Experience />} />
-                        <Route path="/projects" element={<Projects />} />
+                        {/* Category landing page skipped for now — one click
+                            straight to Software instead of Projects -> Software.
+                            <Route path="/projects" element={<Projects />} /> */}
+                        <Route
+                            path="/projects"
+                            element={<Navigate to="/projects/software" replace />}
+                        />
                         <Route path="/contact" element={<Contact />} />
                         <Route
                             path="/projects/software"
