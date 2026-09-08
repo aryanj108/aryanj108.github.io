@@ -43,6 +43,11 @@ import react from '../../assets/icons/skills/react.svg';
 import springboot from '../../assets/icons/skills/springboot.svg';
 import grpc from '../../assets/icons/skills/grpc.svg';
 import rocksdb from '../../assets/icons/skills/rocksdb.svg';
+import claude from '../../assets/icons/skills/claude.svg';
+import openai from '../../assets/icons/skills/openai.svg';
+import githubcopilot from '../../assets/icons/skills/githubcopilot.svg';
+import cursor from '../../assets/icons/skills/cursor.svg';
+import modelcontextprotocol from '../../assets/icons/skills/modelcontextprotocol.svg';
 
 // Concept icons (Material Symbols, tinted to each skill's accent color)
 import sql from '../../assets/icons/skills/sql.svg';
@@ -63,6 +68,13 @@ import microservices from '../../assets/icons/skills/microservices.svg';
 import containers from '../../assets/icons/skills/containers.svg';
 import deltalake from '../../assets/icons/skills/deltalake.svg';
 import hdf5 from '../../assets/icons/skills/hdf5.svg';
+import llmapis from '../../assets/icons/skills/llmapis.svg';
+import rag from '../../assets/icons/skills/rag.svg';
+import llmrouting from '../../assets/icons/skills/llmrouting.svg';
+import aiagents from '../../assets/icons/skills/aiagents.svg';
+import functioncalling from '../../assets/icons/skills/functioncalling.svg';
+import aitooluse from '../../assets/icons/skills/aitooluse.svg';
+import oauth2 from '../../assets/icons/skills/oauth2.svg';
 
 export interface SkillsViewProps {}
 
@@ -87,17 +99,42 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'C++17', icon: cplusplus },
             { name: 'Python', icon: python },
             { name: 'Go', icon: go },
-            { name: 'Java', icon: java },
             { name: 'TypeScript', icon: typescript },
             { name: 'JavaScript', icon: javascript },
+            { name: 'Java', icon: java },
             { name: 'SQL', icon: sql, color: '#e38c00' },
         ],
     },
     {
-        title: 'GPU / ML',
+        title: 'AI / LLM',
         skills: [
-            { name: 'CUDA', icon: nvidia },
+            { name: 'LLM APIs', icon: llmapis, color: '#7c3aed' },
+            { name: 'RAG', icon: rag, color: '#9333ea' },
+            { name: 'LLM Routing', icon: llmrouting, color: '#a855f7' },
+            { name: 'AI Agents', icon: aiagents, color: '#6d28d9' },
+            { name: 'MCP', icon: modelcontextprotocol },
+            {
+                name: 'Function Calling',
+                icon: functioncalling,
+                color: '#8b5cf6',
+            },
+            { name: 'AI Tool Use', icon: aitooluse, color: '#c026d3' },
+        ],
+    },
+    {
+        title: 'AI Development Tools',
+        skills: [
+            { name: 'Claude Code', icon: claude },
+            { name: 'Codex', icon: openai },
+            { name: 'Copilot', icon: githubcopilot },
+            { name: 'Cursor', icon: cursor },
+        ],
+    },
+    {
+        title: 'Machine Learning',
+        skills: [
             { name: 'PyTorch', icon: pytorch },
+            { name: 'CUDA', icon: nvidia },
             { name: 'GPU Computing', icon: gpucomputing, color: '#76b900' },
             { name: 'Deep Learning', icon: deeplearning, color: '#ee4c2c' },
             { name: 'Computer Vision', icon: computervision, color: '#5c3ee8' },
@@ -149,7 +186,20 @@ const SKILL_CATEGORIES: SkillCategory[] = [
         ],
     },
     {
-        title: 'Infrastructure',
+        title: 'Backend / Web',
+        skills: [
+            { name: 'Node.js', icon: nodedotjs },
+            { name: 'Express', icon: express },
+            { name: 'FastAPI', icon: fastapi },
+            { name: 'React', icon: react },
+            { name: 'Spring Boot', icon: springboot },
+            { name: 'REST APIs', icon: restapis, color: '#009688' },
+            { name: 'Microservices', icon: microservices, color: '#6d4aff' },
+            { name: 'gRPC', icon: grpc, color: '#2496ed' },
+        ],
+    },
+    {
+        title: 'Infrastructure / DevOps',
         skills: [
             { name: 'Linux', icon: linux },
             { name: 'Docker', icon: docker },
@@ -157,14 +207,12 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'AWS', icon: aws },
             { name: 'Git', icon: git },
             { name: 'CI/CD', icon: githubactions },
-            { name: 'gRPC', icon: grpc, color: '#2496ed' },
-            { name: 'REST APIs', icon: restapis, color: '#009688' },
-            { name: 'Microservices', icon: microservices, color: '#6d4aff' },
             { name: 'Containers', icon: containers, color: '#0db7ed' },
+            { name: 'OAuth 2.0', icon: oauth2, color: '#1e8e3e' },
         ],
     },
     {
-        title: 'Data & Storage',
+        title: 'Data / Storage',
         skills: [
             { name: 'Apache Spark', icon: apachespark },
             { name: 'PostgreSQL', icon: postgresql },
@@ -174,16 +222,6 @@ const SKILL_CATEGORIES: SkillCategory[] = [
             { name: 'Delta Lake', icon: deltalake, color: '#00add4' },
             { name: 'RocksDB', icon: rocksdb, color: '#2f74c0' },
             { name: 'HDF5', icon: hdf5, color: '#0064a5' },
-        ],
-    },
-    {
-        title: 'Frameworks',
-        skills: [
-            { name: 'Node.js', icon: nodedotjs },
-            { name: 'Express', icon: express },
-            { name: 'FastAPI', icon: fastapi },
-            { name: 'React', icon: react },
-            { name: 'Spring Boot', icon: springboot },
         ],
     },
 ];
