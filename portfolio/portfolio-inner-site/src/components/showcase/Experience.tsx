@@ -54,7 +54,8 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                             platform for Marc Benioff and Salesforce&rsquo;s
                             executive leadership team; built a shared
                             Node.js/TypeScript backend with 40+ REST APIs and
-                            an MCP tool server supporting enterprise workflows.
+                            an MCP tool server enabling agentic LLM workflows
+                            across enterprise systems.
                         </p>
                     </li>
                     <li>
@@ -77,10 +78,11 @@ const Experience: React.FC<ExperienceProps> = (props) => {
                     </li>
                     <li>
                         <p>
-                            Improved AI query accuracy from 21% to 95% and
-                            reduced p50 latency 5&times; through deterministic
-                            entity resolution, LLM routing, and multi-layer
-                            caching across live enterprise data.
+                            Diagnosed production query bottlenecks and
+                            improved AI query accuracy from 21% to 95% while
+                            reducing p50 latency 5&times; through
+                            deterministic entity resolution, LLM routing, and
+                            multi-layer caching across live enterprise data.
                         </p>
                     </li>
                     <li>

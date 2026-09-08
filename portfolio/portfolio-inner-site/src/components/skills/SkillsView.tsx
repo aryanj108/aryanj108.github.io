@@ -44,7 +44,7 @@ import springboot from '../../assets/icons/skills/springboot.svg';
 import grpc from '../../assets/icons/skills/grpc.svg';
 import rocksdb from '../../assets/icons/skills/rocksdb.svg';
 import claude from '../../assets/icons/skills/claude.svg';
-import openai from '../../assets/icons/skills/openai.svg';
+import codex from '../../assets/icons/skills/codex.svg';
 import githubcopilot from '../../assets/icons/skills/githubcopilot.svg';
 import cursor from '../../assets/icons/skills/cursor.svg';
 import modelcontextprotocol from '../../assets/icons/skills/modelcontextprotocol.svg';
@@ -125,7 +125,7 @@ const SKILL_CATEGORIES: SkillCategory[] = [
         title: 'AI Development Tools',
         skills: [
             { name: 'Claude Code', icon: claude },
-            { name: 'Codex', icon: openai },
+            { name: 'Codex', icon: codex },
             { name: 'Copilot', icon: githubcopilot },
             { name: 'Cursor', icon: cursor },
         ],
