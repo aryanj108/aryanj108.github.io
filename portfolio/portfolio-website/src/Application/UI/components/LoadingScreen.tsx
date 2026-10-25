@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import eventBus from '../EventBus';
+import track from '../../Utils/analytics';
 import { W, H, TICK_MS, drawScene } from './BeachVolleyball';
 
 type LoadingProps = {};
-
-const FONT_URL =
-    'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
 
 // Pixel-art beach volleyball scene (see BeachVolleyball.ts), drawn on a small
 // pixel grid and scaled up with sharp edges.
@@ -48,15 +46,6 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     const readyRef = useRef(false);
 
     useEffect(() => {
-        // Pixel font (falls back to monospace if it can't be fetched).
-        if (!document.getElementById('pixel-font')) {
-            const link = document.createElement('link');
-            link.id = 'pixel-font';
-            link.rel = 'stylesheet';
-            link.href = FONT_URL;
-            document.head.appendChild(link);
-        }
-
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('debug')) {
             ready();
@@ -110,6 +99,9 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     }, []);
 
     const beginExperience = useCallback(() => {
+        // Counts visitors who actually enter the scene (first click/key/tap
+        // after loading), not just page loads.
+        track('scene-enter');
         eventBus.dispatch('loadingScreenDone', {});
     }, []);
 
