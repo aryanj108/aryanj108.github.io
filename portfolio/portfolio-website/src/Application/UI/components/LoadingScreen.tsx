@@ -1,78 +1,79 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import eventBus from '../EventBus';
+import { W, H, TICK_MS, drawScene } from './BeachVolleyball';
 
 type LoadingProps = {};
 
-const LoadingScreen: React.FC<LoadingProps> = () => {
-    const [progress, setProgress] = useState(0);
-    const [toLoad, setToLoad] = useState(0);
-    const [loaded, setLoaded] = useState(0);
-    const [overlayOpacity, setLoadingOverlayOpacity] = useState(1);
-    const [loadingTextOpacity, setLoadingTextOpacity] = useState(1);
-    const [startPopupOpacity, setStartPopupOpacity] = useState(0);
-    const [firefoxPopupOpacity, setFirefoxPopupOpacity] = useState(0);
-    const [webGLErrorOpacity, setWebGLErrorOpacity] = useState(0);
+const FONT_URL =
+    'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
 
-    const [showBiosInfo, setShowBiosInfo] = useState(false);
-    const [showLoadingResources, setShowLoadingResources] = useState(false);
-    const [doneLoading, setDoneLoading] = useState(false);
-    const [webGLError, setWebGLError] = useState(false);
-    const [counter, setCounter] = useState(0);
-    const [resources] = useState<string[]>([]);
-    const [mobileWarning, setMobileWarning] = useState(window.innerWidth < 768);
-
-    const onResize = () => {
-        if (window.innerWidth < 768) {
-            setMobileWarning(true);
-        } else {
-            setMobileWarning(false);
-        }
-    };
-
-    window.addEventListener('resize', onResize);
+// Pixel-art beach volleyball scene (see BeachVolleyball.ts), drawn on a small
+// pixel grid and scaled up with sharp edges.
+const PixelScene: React.FC = () => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [scale] = useState(() =>
+        Math.max(2, Math.min(5, Math.floor(Math.min(window.innerWidth - 48, 640) / W)))
+    );
 
     useEffect(() => {
+        const ctx = canvasRef.current?.getContext('2d');
+        if (!ctx) return;
+        let tick = 0;
+        drawScene(ctx, tick);
+        const timer = setInterval(() => {
+            tick++;
+            drawScene(ctx, tick);
+        }, TICK_MS);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            width={W}
+            height={H}
+            style={Object.assign({}, styles.scene, {
+                width: W * scale,
+                height: H * scale,
+            })}
+        />
+    );
+};
+
+const LoadingScreen: React.FC<LoadingProps> = () => {
+    const [progress, setProgress] = useState(0);
+    const [overlayOpacity, setLoadingOverlayOpacity] = useState(1);
+    const [webGLErrorOpacity, setWebGLErrorOpacity] = useState(0);
+    const [webGLError, setWebGLError] = useState(false);
+    const readyRef = useRef(false);
+
+    useEffect(() => {
+        // Pixel font (falls back to monospace if it can't be fetched).
+        if (!document.getElementById('pixel-font')) {
+            const link = document.createElement('link');
+            link.id = 'pixel-font';
+            link.rel = 'stylesheet';
+            link.href = FONT_URL;
+            document.head.appendChild(link);
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('debug')) {
-            start();
+            ready();
         } else if (!detectWebGLContext()) {
             setWebGLError(true);
-        } else {
-            setShowBiosInfo(true);
         }
     }, []);
 
     useEffect(() => {
         eventBus.on('loadedSource', (data) => {
             setProgress(data.progress);
-            setToLoad(data.toLoad);
-            setLoaded(data.loaded);
-            resources.push(
-                `Loaded ${data.sourceName}${getSpace(
-                    data.sourceName
-                )} ... ${Math.round(data.progress * 100)}%`
-            );
-            if (resources.length > 8) {
-                resources.shift();
-            }
         });
     }, []);
 
     useEffect(() => {
-        setShowLoadingResources(true);
-        setCounter(counter + 1);
-    }, [loaded]);
-
-    useEffect(() => {
         if (progress >= 1 && !webGLError) {
-            setDoneLoading(true);
-
-            setTimeout(() => {
-                setLoadingTextOpacity(0);
-                setTimeout(() => {
-                    setStartPopupOpacity(1);
-                }, 500);
-            }, 1000);
+            ready();
         }
     }, [progress]);
 
@@ -84,31 +85,33 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
         }
     }, [webGLError]);
 
-    const start = useCallback(() => {
+    // Everything is loaded: fade out the overlay and reveal the scene.
+    const ready = useCallback(() => {
+        if (readyRef.current) return;
+        readyRef.current = true;
+
         setLoadingOverlayOpacity(0);
-        eventBus.dispatch('loadingScreenDone', {});
+        eventBus.dispatch('sceneReady', {});
         const ui = document.getElementById('ui');
         if (ui) {
             ui.style.pointerEvents = 'none';
         }
+
+        // The first user gesture starts the ambience and the interactive UI
+        // (browsers block audio until the user interacts with the page).
+        const events = ['mousedown', 'touchstart', 'keydown'];
+        const onFirstGesture = () => {
+            events.forEach((e) =>
+                document.removeEventListener(e, onFirstGesture)
+            );
+            beginExperience();
+        };
+        events.forEach((e) => document.addEventListener(e, onFirstGesture));
     }, []);
 
-    const getSpace = (sourceName: string) => {
-        let spaces = '';
-        for (let i = 0; i < 24 - sourceName.length; i++) spaces += '\xa0';
-        return spaces;
-    };
-
-    const getCurrentDate = () => {
-        const date = new Date();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const year = date.getFullYear();
-        // add leading zero
-        const monthFormatted = month < 10 ? `0${month}` : month;
-        const dayFormatted = day < 10 ? `0${day}` : day;
-        return `${monthFormatted}/${dayFormatted}/${year}`;
-    };
+    const beginExperience = useCallback(() => {
+        eventBus.dispatch('loadingScreenDone', {});
+    }, []);
 
     const detectWebGLContext = () => {
         var canvas = document.createElement('canvas');
@@ -128,145 +131,23 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
         <div
             style={Object.assign({}, styles.overlay, {
                 opacity: overlayOpacity,
-                transform: `scale(${overlayOpacity === 0 ? 1.1 : 1})`,
             })}
         >
-            {startPopupOpacity === 0 && loadingTextOpacity === 0 && (
-                <div style={styles.blinkingContainer}>
-                    <span className="blinking-cursor" />
-                </div>
-            )}
             {!webGLError && (
-                <div
-                    style={Object.assign({}, styles.overlayText, {
-                        opacity: loadingTextOpacity,
-                    })}
-                >
-                    <div
-                        style={styles.header}
-                        className="loading-screen-header"
-                    >
-                        <div style={styles.logoContainer}>
-                            <div>
-                                <p style={styles.green}>
-                                    <b>Jalota,</b>{' '}
-                                </p>
-                                <p style={styles.green}>
-                                    <b>Aryan Inc.</b>
-                                </p>
-                            </div>
-                        </div>
-                        <div style={styles.headerInfo}>
-                            <p>Released: 01/13/2000</p>
-                            <p>AJBIOS (C)2000 Jalota Aryan Inc.,</p>
-                        </div>
-                    </div>
-                    <div style={styles.body} className="loading-screen-body">
-                        <p>HSP S13 2000-2022 Special UC131S</p>
-                        <div style={styles.spacer} />
-                        {showBiosInfo && (
-                            <>
-                                <p>HSP Showcase(tm) XX 113</p>
-                                <p>Checking RAM : {14000} OK</p>
-                                <div style={styles.spacer} />
-                                <div style={styles.spacer} />
-                                {showLoadingResources ? (
-                                    progress == 1 ? (
-                                        <p>FINISHED LOADING RESOURCES</p>
-                                    ) : (
-                                        <p className="loading">
-                                            LOADING RESOURCES ({loaded}/
-                                            {toLoad === 0 ? '-' : toLoad})
-                                        </p>
-                                    )
-                                ) : (
-                                    <p className="loading">WAIT</p>
-                                )}
-                            </>
-                        )}
-                        <div style={styles.spacer} />
-                        <div style={styles.resourcesLoadingList}>
-                            {resources.map((sourceName) => (
-                                <p key={sourceName}>{sourceName}</p>
-                            ))}
-                        </div>
-                        <div style={styles.spacer} />
-                        {showLoadingResources && doneLoading && (
-                            <p>
-                                All Content Loaded, launching{' '}
-                                <b style={styles.green}>
-                                    'Aryan Jalota Portfolio Showcase'
-                                </b>{' '}
-                                V1.0
-                            </p>
-                        )}
-                        <div style={styles.spacer} />
-                        <span className="blinking-cursor" />
-                    </div>
-                    <div
-                        style={styles.footer}
-                        className="loading-screen-footer"
-                    >
-                        <p>
-                            Press <b>DEL</b> to enter SETUP , <b>ESC</b> to skip
-                            memory test
-                        </p>
-                        <p>{getCurrentDate()}</p>
+                <div style={styles.center}>
+                    <PixelScene />
+                    <div style={styles.percent}>
+                        LOADING {Math.round(progress * 100)}%
                     </div>
                 </div>
             )}
-            <div
-                style={Object.assign({}, styles.popupContainer, {
-                    opacity: startPopupOpacity,
-                })}
-            >
-                <div style={styles.startPopup}>
-                    {/* <p style={styles.red}>
-                        <b>THIS SITE IS CURRENTLY A W.I.P.</b>
-                    </p>
-                    <p>But do enjoy what I have done so far :)</p>
-                    <div style={styles.spacer} />
-                    <div style={styles.spacer} /> */}
-                    <p>Aryan Jalota Portfolio Showcase 2026</p>
-                    {mobileWarning && (
-                        <>
-                            <br />
-                            <b>
-                                <p style={styles.warning}>
-                                    WARNING: This experience is best viewed on
-                                </p>
-                                <p style={styles.warning}>
-                                    a desktop or laptop computer.
-                                </p>
-                            </b>
-                            <br />
-                        </>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <p>Click start to begin{'\xa0'}</p>
-                        <span className="blinking-cursor" />
-                    </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            marginTop: '16px',
-                        }}
-                    >
-                        <div className="bios-start-button" onClick={start}>
-                            <p>START</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
             {webGLError && (
                 <div
                     style={Object.assign({}, styles.popupContainer, {
                         opacity: webGLErrorOpacity,
                     })}
                 >
-                    <div style={styles.startPopup}>
+                    <div style={styles.errorPopup}>
                         <p>
                             <b style={{ color: 'red' }}>CRITICAL ERROR:</b> No
                             WebGL Detected
@@ -288,35 +169,40 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
 
 const styles: StyleSheetCSS = {
     overlay: {
-        backgroundColor: 'black',
+        position: 'relative',
+        backgroundColor: '#000',
         width: '100%',
         height: '100%',
         display: 'flex',
-        transition: 'opacity 0.2s, transform 0.2s',
-        MozTransition: 'opacity 0.2s, transform 0.2s',
-        WebkitTransition: 'opacity 0.2s, transform 0.2s',
-        OTransition: 'opacity 0.2s, transform 0.2s',
-        msTransition: 'opacity 0.2s, transform 0.2s',
-
-        transitionTimingFunction: 'ease-in-out',
-        MozTransitionTimingFunction: 'ease-in-out',
-        WebkitTransitionTimingFunction: 'ease-in-out',
-        OTransitionTimingFunction: 'ease-in-out',
-        msTransitionTimingFunction: 'ease-in-out',
-
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+        // slow, smooth fade into the 3D scene
+        transition: 'opacity 1.4s ease-in-out',
         boxSizing: 'border-box',
-        fontSize: 16,
-        letterSpacing: 0.8,
     },
-
+    center: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 'clamp(16px, 3vh, 28px)',
+    },
+    scene: {
+        imageRendering: 'pixelated',
+        border: '3px solid #777',
+        boxSizing: 'content-box',
+    },
+    percent: {
+        fontFamily: '"Press Start 2P", monospace',
+        fontSize: 'clamp(9px, 1.2vw, 13px)',
+        color: '#d0d0d0',
+        letterSpacing: 1,
+        // keep the width steady while the number changes
+        minWidth: '16ch',
+        textAlign: 'center',
+    },
     spacer: {
         height: 16,
-    },
-    header: {
-        width: '100%',
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'row',
     },
     popupContainer: {
         position: 'absolute',
@@ -328,20 +214,7 @@ const styles: StyleSheetCSS = {
         justifyContent: 'center',
         alignItems: 'center',
     },
-    warning: {
-        color: 'yellow',
-    },
-    blinkingContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        boxSizing: 'border-box',
-        padding: 48,
-    },
-    startPopup: {
+    errorPopup: {
         backgroundColor: '#000',
         padding: 24,
         border: '7px solid #fff',
@@ -349,52 +222,6 @@ const styles: StyleSheetCSS = {
         flexDirection: 'column',
         justifyContent: 'center',
         maxWidth: 500,
-        // alignItems: 'center',
-    },
-    headerInfo: {
-        marginLeft: 64,
-    },
-    red: {
-        color: '#00ff00',
-    },
-    link: {
-        // textDecoration: 'none',
-        color: '#4598ff',
-        cursor: 'pointer',
-    },
-    overlayText: {
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-    },
-    body: {
-        flex: 1,
-        display: 'flex',
-        width: '100%',
-        boxSizing: 'border-box',
-        flexDirection: 'column',
-    },
-    logoContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    resourcesLoadingList: {
-        display: 'flex',
-        paddingLeft: 32,
-        paddingBottom: 32,
-        flexDirection: 'column',
-    },
-    logoImage: {
-        width: 64,
-        height: 42,
-        imageRendering: 'pixelated',
-        marginRight: 16,
-    },
-    footer: {
-        boxSizing: 'border-box',
-        width: '100%',
     },
 };
 

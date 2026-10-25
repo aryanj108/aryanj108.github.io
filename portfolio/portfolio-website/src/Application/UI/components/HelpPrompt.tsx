@@ -8,9 +8,10 @@ const HELP_TEXT = 'Click anywhere to begin';
 type HelpPromptProps = {};
 
 const HelpPrompt: React.FC<HelpPromptProps> = () => {
-    const [helpText, setHelpText] = useState('');
+    const [typed, setTyped] = useState('');
     const [visible, setVisible] = useState(true);
     const visRef = useRef(visible);
+    const [mobileWarning] = useState(window.innerWidth < 768);
 
     const typeHelpText = (i: number, curText: string) => {
         if (i < HELP_TEXT.length && visRef.current) {
@@ -20,7 +21,7 @@ const HelpPrompt: React.FC<HelpPromptProps> = () => {
                     '*'
                 );
 
-                setHelpText(curText + HELP_TEXT[i]);
+                setTyped(curText + HELP_TEXT[i]);
                 typeHelpText(i + 1, curText + HELP_TEXT[i]);
             }, Math.random() * 120 + 50);
         }
@@ -47,15 +48,22 @@ const HelpPrompt: React.FC<HelpPromptProps> = () => {
         visRef.current = visible;
     }, [visible]);
 
-    return helpText.length > 0 ? (
+    return typed.length > 0 ? (
         <motion.div
             variants={vars}
             animate={visible ? 'visible' : 'hide'}
             style={styles.container}
         >
-            <p>{helpText}</p>
-            <div style={styles.blinkingContainer}>
-                <div className="blinking-cursor" />
+            {mobileWarning && (
+                <p style={styles.warning}>
+                    WARNING: Best viewed on a desktop or laptop computer.
+                </p>
+            )}
+            <div style={styles.helpRow}>
+                <p>{typed}</p>
+                <div style={styles.blinkingContainer}>
+                    <div className="blinking-cursor" />
+                </div>
             </div>
         </motion.div>
     ) : (
@@ -87,7 +95,15 @@ const styles: StyleSheetCSS = {
         paddingRight: 16,
         textAlign: 'center',
         display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    helpRow: {
+        display: 'flex',
         alignItems: 'flex-end',
+    },
+    warning: {
+        color: 'yellow',
     },
     blinkingContainer: {
         // width: 100,

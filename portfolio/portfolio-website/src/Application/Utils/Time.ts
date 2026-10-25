@@ -20,7 +20,7 @@ export default class Time extends EventEmitter {
             this.tick();
         });
 
-        UIEventBus.on('loadingScreenDone', () => {
+        UIEventBus.on('sceneReady', () => {
             this.start = Date.now();
         });
     }
